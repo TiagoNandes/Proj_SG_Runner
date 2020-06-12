@@ -31,7 +31,7 @@ var ground;
 //var orbitControl;
 var rollingGroundSphere;
 var heroSphere;
-var rollingSpeed = 0.008;
+var rollingSpeed = 0.003;
 var heroRollingSpeed;
 var worldRadius = 26;
 var heroRadius = 0.2;
@@ -95,7 +95,6 @@ function createScene() {
     clock.start();
     heroRollingSpeed = (rollingSpeed * worldRadius / heroRadius) / 5;
     sphericalHelper = new THREE.Spherical();
-    pathAngleValues = [1.52, 1.57, 1.62];
 
 
 
@@ -268,8 +267,8 @@ function createScene() {
     //----------------------------------------------------------------------------
     // Camera position
     //----------------------------------------------------------------------------
-    camera.position.z = 5;
-    camera.position.y = 1.5;
+    // camera.position.z = 5;
+    // camera.position.y = 1.5;
 
     //----------------------------------------------------------------------------
     // Lights and shadows
@@ -446,7 +445,7 @@ function createHeart() {
         color: 0xE31B23
     });
 
-    const x = -2.5;
+    const x = -2;
     const y = -5;
     heartShape.moveTo(x + 2.5, y + 2.5);
     heartShape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
@@ -471,7 +470,8 @@ function createHeart() {
     heart = new THREE.Mesh(geometry, heartMaterial);
 
     //resize heart
-    heart.scale.set(0.2, 0.2, .2);
+    heart.scale.set(0.1, 0.1, 0.1);
+
 
     //rotate heart
     heart.rotateZ(Math.PI / 2 );
@@ -482,27 +482,27 @@ function createHeart() {
 }
 
 //Heart animation
-function rotateHeart() {
-    heart.rotation.z -= heartRotationSpeed;
-    if (up) {
-        heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), 0.02)
-        if (Math.floor(heart.position.z) == -1) {
-            up = false
+// function rotateHeart() {
+//     heart.rotation.z -= heartRotationSpeed;
+//     if (up) {
+//         heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), 0.02)
+//         if (Math.floor(heart.position.z) == -1) {
+//             up = false
 
-        }
-    } else if (!up) {
-        heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), -0.02)
-        if (Math.floor(heart.position.z) == 1) {
-            up = true
+//         }
+//     } else if (!up) {
+//         heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), -0.02)
+//         if (Math.floor(heart.position.z) == 1) {
+//             up = true
 
-        }
-    } else {
-        heart.position.set(0, 0, 0)
+//         }
+//     } else {
+//         heart.position.set(0, 0, 0)
 
-    }
+//     }
 
 
-}
+// }
 
 
 //ver melhor o que isto faz 
@@ -519,8 +519,8 @@ function addPathHeart(){
 }
 
 function addWorldHearts(){
-	var numHearts=16;
-    var gap=6.28/ numHearts;
+	var numHearts=36;
+    var gap=6.28/ 36;
     // var gap=6.28/ 36;
 	for(var i=0;i<numHearts;i++){
 		addHeart(false,i*gap, true);
@@ -544,13 +544,13 @@ function addHeart(inPath, row, isLeft){
 		}else{
 			forestAreaAngle=1.46-Math.random()*0.1;
 		}
-		sphericalHelper.set( worldRadius-0.3, forestAreaAngle, row );
+		sphericalHelper.set( worldRadius + 0.5, forestAreaAngle, row );
 	}
 	newHeart.position.setFromSpherical( sphericalHelper );
-	//var rollingGroundVector=rollingGroundSphere.position.clone().normalize();
-	//var heartVector=newHeart.position.clone().normalize();
-	//newHeart.quaternion.setFromUnitVectors(heartVector,rollingGroundVector);
-	//newHeart.rotation.x+=(Math.random()*(2*Math.PI/10))+-Math.PI/10;
+	var rollingGroundVector=rollingGroundSphere.position.clone().normalize();
+	var heartVector=newHeart.position.clone().normalize();
+    newHeart.quaternion.setFromUnitVectors(heartVector,rollingGroundVector);
+    newHeart.rotation.x+=(Math.random()*(2*Math.PI/10))+-Math.PI/10;
 	
 	rollingGroundSphere.add(newHeart);
 }
@@ -568,7 +568,7 @@ function update() {
 }
 
 function render() {
-    rotateHeart();
+    // rotateHeart();
     renderer.render(scene, camera); //draw
 }
 
