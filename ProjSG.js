@@ -144,6 +144,7 @@ window.onload = function () {
         });
 
         rollingGroundSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //Allow shadow
         rollingGroundSphere.receiveShadow = true;
         rollingGroundSphere.castShadow = false;
         rollingGroundSphere.rotation.z = -Math.PI / 2;
@@ -153,48 +154,6 @@ window.onload = function () {
         addWorldHearts();
         addWorldBarriers();
         addWorldVirus();
-    }
-
-    function createHeart() {
-        var heartShape = new THREE.Shape();
-        let heartMaterial = new THREE.MeshBasicMaterial({
-            color: 0xE31B23
-        });
-
-        const x = -2;
-        const y = -5;
-        heartShape.moveTo(x + 2.5, y + 2.5);
-        heartShape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
-        heartShape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        heartShape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        heartShape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-        heartShape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        heartShape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
-
-        var extrudeSettings = {
-            amount: 1,
-            bevelEnabled: true,
-            bevelSegments: 2,
-            steps: 2,
-            depth: 1,
-            bevelSize: 1,
-            bevelThickness: 1
-        };
-
-        var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
-
-        heart = new THREE.Mesh(geometry, heartMaterial);
-
-        //resize heart
-        heart.scale.set(0.1, 0.1, 0.1);
-
-
-        //rotate heart
-        heart.rotateZ(Math.PI / 2);
-
-        //scene.add(heart);
-
-        return heart;
     }
 
     //Heart animation
@@ -253,6 +212,7 @@ window.onload = function () {
         var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
 
         heart = new THREE.Mesh(geometry, heartMaterial);
+        heart.castShadow = true;
 
         //resize heart
         heart.scale.set(0.1, 0.1, 0.1);
