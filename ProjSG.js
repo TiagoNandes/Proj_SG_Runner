@@ -60,6 +60,10 @@ var score;
 var hasCollided;
 
 
+//barrier vars
+var barriersInPath;
+var barriersPool;
+
 
 
 
@@ -81,7 +85,8 @@ function createScene() {
     sphericalHelper = new THREE.Spherical();
 
 
-
+    barriersInPath = [];
+    barriersPool = [];
 
 
 
@@ -89,8 +94,8 @@ function createScene() {
 
     hasCollided = false;
     score = 0;
-    treesInPath = [];
-    treesPool = [];
+    // treesInPath = [];
+    // treesPool = [];
     clock = new THREE.Clock();
     clock.start();
     heroRollingSpeed = (rollingSpeed * worldRadius / heroRadius) / 5;
@@ -481,6 +486,29 @@ function createHeart() {
     return heart;
 }
 
+function createBarrier() {
+    var barrierGeometry = new THREE.BoxGeometry(2, 4, 10);
+    // Create a texture phong material for the sphere, with map and bumpMap textures
+    barrierMap = new THREE.TextureLoader().load('textures/barrier.jpg');
+    barrierBumpMap = new THREE.TextureLoader().load('textures/barrier.jpg');
+    barrierMaterial = new THREE.MeshPhongMaterial({
+        map: barrierMap,
+        bumpMap: barrierBumpMap,
+        bumpScale: 0.1
+    });
+
+    var barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+
+    //resize barrier
+    barrier.scale.set(0.2, 0.2, .2);
+
+    //rotate barrier
+    barrier.rotateY(Math.PI / 2);
+
+
+    return barrier;
+}
+
 //Heart animation
 // function rotateHeart() {
 //     heart.rotation.z -= heartRotationSpeed;
@@ -551,8 +579,8 @@ function addHeart(inPath, row, isLeft) {
     var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
     var heartVector = newHeart.position.clone().normalize();
     newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
-    newHeart.rotation.y += -((Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10);
-    
+    //newHeart.rotation.y += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+    newHeart.rotation.y += ((Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10);
 
     rollingGroundSphere.add(newHeart);
 }
@@ -565,14 +593,10 @@ function update() {
     //Ground animation
     rollingGroundSphere.rotation.x += rollingSpeed;
 
-    render();
+    renderer.render(scene, camera);
     requestAnimationFrame(update); //request next update
 }
 
-function render() {
-    // rotateHeart();
-    renderer.render(scene, camera); //draw
-}
 
 function onWindowResize() {
     //resize & align
