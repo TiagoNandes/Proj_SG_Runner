@@ -33,11 +33,12 @@ window.onload = function () {
     var explosionPower = 1.06;
     var particles;
     //var stats;
-    var score;
+
     var hasCollided;
 
     //****** FABIO VARIABLES */
     let clock, loader, mixer, animations, robot;
+    let score = 0;
     // Array of obstacles
     let obstacles = [];
     // Initial state of the robot animation which is "Idle" by default
@@ -260,6 +261,9 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
+        addScoreAndHealth();
+        // updateScoreAndHealth();
+
         //createHeart();
         //createHeartsPool();
 
@@ -523,6 +527,41 @@ window.onload = function () {
             })
     }
 
+
+    function updateScoreAndHealth() {
+        if (score >= 1000) {
+            score++;
+        }
+
+    }
+
+    function addScoreAndHealth() {
+        let loader = new THREE.FontLoader();
+        loader.load('fonts/font.json', data => {
+            font = data;
+            let text = 'Score: ' + score;
+            let geo = new THREE.TextGeometry(text, {
+                font: font,
+                size: 0.3,
+                height: 0.05
+            })
+
+            let material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+            let scoreMesh = new THREE.Mesh(geo, material);
+            scoreMesh.position.x = worldRadius - 26.8;
+            scoreMesh.position.y = 5;
+            scoreMesh.position.z = 1;
+            // scoreMesh.rotateY(Math.PI / 2)
+            scene.add(scoreMesh)
+
+
+        })
+    }
+
+
+
     // Function to handle pressed keys by the user 
     function handleKeyDown(e) {
         let keyCode = e.which
@@ -608,6 +647,7 @@ window.onload = function () {
         //Ground animation
         rollingGroundSphere.rotation.x += rollingSpeed;
         requestAnimationFrame(update); //request next update
+        setInterval(updateScoreAndHealth(), 1000);
 
         /***FABIO*/
         let deltaTime = clock.getDelta();
