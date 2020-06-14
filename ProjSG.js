@@ -34,7 +34,6 @@ window.onload = function () {
         pathAngleValues = [1.52, 1.57, 1.62];
         sphericalHelper = new THREE.Spherical();
 
-        score = 0;
         clock = new THREE.Clock();
 
         sphericalHelper = new THREE.Spherical();
