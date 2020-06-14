@@ -154,6 +154,8 @@ window.onload = function () {
         rollingGroundSphere.position.y = -24;
         rollingGroundSphere.position.z = 2;
         addWorldHearts();
+        addWorldBarriers();
+        addWorldVirus();
     }
 
     //----------------------------------------------------------------------------
@@ -194,7 +196,7 @@ window.onload = function () {
 
 
         //rotate heart
-        heart.rotateZ(Math.PI / 2);
+        //heart.rotateZ(Math.PI / 2);
 
         //scene.add(heart);
 
@@ -305,10 +307,10 @@ window.onload = function () {
         var virus = new THREE.Mesh(mergeGeometry, [sphereMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial]);
 
         //resize virus
-        virus.scale.set(0.2, 0.2, .2);
+        virus.scale.set(0.15, 0.15, .15);
 
         //rotate virus
-        virus.rotateY(-Math.PI / 2);
+        //virus.rotateY(-Math.PI / 2);
 
         return virus;
     }
@@ -334,7 +336,7 @@ window.onload = function () {
         barrier.scale.set(0.2, 0.2, .2);
 
         //rotate barrier
-        barrier.rotateY(Math.PI / 2);
+        //barrier.rotateY(Math.PI / 2);
 
         return barrier;
 
@@ -377,8 +379,9 @@ window.onload = function () {
         }
     }
 
+    
     //----------------------------------------------------------------------------
-    // Sets the new object's position on the scene 
+    // Sets the new heart's position on the scene 
     //----------------------------------------------------------------------------
     function addHeart(inPath, row, isLeft) {
         var newHeart;
@@ -406,6 +409,95 @@ window.onload = function () {
         newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
         rollingGroundSphere.add(newHeart);
+    }
+
+    //----------------------------------------------------------------------------
+    // Adds barriers to the scene based on the number of hearts and the gap between them
+    //----------------------------------------------------------------------------
+    function addWorldBarriers() {
+        var numBarriers = 15; //36
+        var gap = 6.28 / 15; //6.28 / 36
+        // var gap=6.28/ 36;
+        for (var i = 0; i < numBarriers; i++) {
+            addBarrier(false, i * gap, true);
+            //addBarrier(false, i * gap, false);
+        }
+    }
+
+    //----------------------------------------------------------------------------
+    // Sets the new barrier's position on the scene 
+    //----------------------------------------------------------------------------
+    function addBarrier(inPath, row, isLeft) {
+        var newBarrier;
+        if (inPath) {
+            if (barriersPool.length == 0) return;
+            newBarrier = barriersPool.pop();
+            newBarrier.visible = true;
+            barriersInPath.push(newBarrier);
+            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+        } else {
+            newBarrier = createBarrier();
+            // Define Left and Right position of the heart object
+            var forestAreaAngle = 0; //[1.52,1.57,1.62];
+            if (isLeft) {
+                forestAreaAngle = 1.68 + Math.random() * 0.3;
+            } else {
+                forestAreaAngle = 1.46 - Math.random() * 0.1;
+            }
+            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+        }
+        newBarrier.position.setFromSpherical(sphericalHelper);
+        var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+        var barrierVector = newBarrier.position.clone().normalize();
+        newBarrier.quaternion.setFromUnitVectors(barrierVector, rollingGroundVector);
+        newBarrier.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+
+        rollingGroundSphere.add(newBarrier);
+    }
+
+
+    //----------------------------------------------------------------------------
+    // Adds virus to the scene based on the number of hearts and the gap between them
+    //----------------------------------------------------------------------------
+    function addWorldVirus() {
+        var numVirus = 15; //36
+        var gap = 9.28 / 15; //6.28 / 36
+        // var gap=6.28/ 36;
+        for (var i = 0; i < numVirus; i++) {
+            addVirus(false, i * gap, true);
+            //addVirus(false, i * gap, false);
+        }
+    }
+
+    //----------------------------------------------------------------------------
+    // Sets the new virus' position on the scene 
+    //----------------------------------------------------------------------------
+    function addVirus(inPath, row, isLeft) {
+        var newVirus;
+        if (inPath) {
+            if (virusPool.length == 0) return;
+            newVirus = virusPool.pop();
+            newVirus.visible = true;
+            virusInPath.push(newVirus);
+            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+        } else {
+            newVirus = createVirus();
+            // Define Left and Right position of the heart object
+            var forestAreaAngle = 0; //[1.52,1.57,1.62];
+            if (isLeft) {
+                forestAreaAngle = 1.68 + Math.random() * 0.3;
+            } else {
+                forestAreaAngle = 1.46 - Math.random() * 0.1;
+            }
+            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+        }
+        newVirus.position.setFromSpherical(sphericalHelper);
+        var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+        var virusVector = newVirus.position.clone().normalize();
+        newVirus.quaternion.setFromUnitVectors(virusVector, rollingGroundVector);
+        newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+
+        rollingGroundSphere.add(newVirus);
     }
 
     //----------------------------------------------------------------------------
