@@ -132,9 +132,7 @@ window.onload = function () {
     // Adds the moon to the scene and calls the object's functions
     //----------------------------------------------------------------------------
     function addWorld() {
-        var sides = 60;
-        var tiers = 60;
-        var sphereGeometry = new THREE.SphereGeometry(worldRadius, sides, tiers);
+        var sphereGeometry = new THREE.SphereGeometry(worldRadius, 60, 60);
 
         // Create a texture phong material for the sphere, with map and bumpMap textures
         map = new THREE.TextureLoader().load('textures/mercury.jpg');
