@@ -96,8 +96,8 @@ window.onload = function () {
         //createHeart();
         //createHeartsPool();
 
-        camera.position.z = 6.5;
-        camera.position.y = 2.5;
+        camera.position.z = 10.5;
+        camera.position.y = 5.5;
 
         //Helping grid
         var gridXZ = new THREE.GridHelper(100, 10);
@@ -483,8 +483,13 @@ window.onload = function () {
                 animations = gltf.animations;
                 scene.add(robot);
                 // Set positions 
-                robot.position.y = -2;
+                robot.position.y = 2;
+                robot.position.z = 1;
+                robot.scale.set(0.3, 0.3, 0.3);
                 camera.position.z = 5;
+
+                // Rotation
+                robot.rotation.y = Math.PI;
 
                 // Play Idle animation at first 
                 mixer = new THREE.AnimationMixer(robot);
