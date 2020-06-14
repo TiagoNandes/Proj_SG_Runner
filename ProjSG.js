@@ -1,15 +1,44 @@
 window.onload = function () {
-    var sceneWidth, sceneHeight, rollingGroundSphere, dom, sun, camera, scene, renderer, sphericalHelper, pathAngleValues;
-    var heartsInPath, heartsPool, score, hasCollided, up;
-    var orbitControl;
-    var rollingSpeed = 0.003;
-    var worldRadius = 26;
-    //var heartRotationSpeed = 1;
-    var heartReleaseInterval = 0.5;
+    // var heartRotationSpeed = 1;
+    // let up = true;
 
+    var sceneWidth, sceneHeight;
+    var camera, scene, renderer;
+    var dom;
+    var sun;
+    var ground;
+    //var orbitControl;
+    var rollingGroundSphere;
+    var heroSphere;
+    var rollingSpeed = 0.003;
+    var heroRollingSpeed;
+    var worldRadius = 26;
+    var heroRadius = 0.2;
+    var sphericalHelper;
+    var pathAngleValues;
+    var heroBaseY = 1.8;
+    var bounceValue = 0.1;
+    var gravity = 0.005;
+    var leftLane = -1;
+    var rightLane = 1;
+    var middleLane = 0;
+    var currentLane;
+    var jumping;
+    var treeReleaseInterval = 0.5;
+    var lastTreeReleaseTime = 0;
+    var heartsInPath;
+    var heartsPool;
+    var particleGeometry;
+    var particleCount = 20;
+    var explosionPower = 1.06;
+    var particles;
+    //var stats;
+
+    var hasCollided;
 
     //****** FABIO VARIABLES */
     let clock, loader, mixer, animations, robot;
+    let score = 0;
     // Array of obstacles
     let obstacles = [];
     // Initial state of the robot animation which is "Idle" by default
@@ -20,6 +49,7 @@ window.onload = function () {
 
 
     function init() {
+
         // set up the scene
         createScene();
         //call game loop
@@ -33,9 +63,13 @@ window.onload = function () {
         pathAngleValues = [1.52, 1.57, 1.62];
         sphericalHelper = new THREE.Spherical();
 
+        hasCollided = false;
         score = 0;
+        treesInPath = [];
+        treesPool = [];
         clock = new THREE.Clock();
 
+        heroRollingSpeed = (rollingSpeed * worldRadius / heroRadius) / 5;
         sphericalHelper = new THREE.Spherical();
 
         //Scene Properties
@@ -56,9 +90,6 @@ window.onload = function () {
         dom = document.getElementById('gameContainer');
         dom.appendChild(renderer.domElement);
 
-        //----------------------------------------------------------------------------
-        // Camera position
-        //----------------------------------------------------------------------------
         camera.position.z = 10.5;
         camera.position.y = 5.5;
 
@@ -66,148 +97,32 @@ window.onload = function () {
         // var gridXZ = new THREE.GridHelper(100, 10);
         // scene.add(gridXZ);
 
-
         //----------------------------------------------------------------------------
-        // Enables mouse and zoom controlls on the scene 
+        // Add Barrier
         //----------------------------------------------------------------------------
-        orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
-        orbitControl.addEventListener('change', render);
-        // Disable zoom functionality
-        orbitControl.enableZoom = true;
-
-
-        // Call Functions to add the components of the game
-        // createHeartsPool();
-        addWorld();
-        addLight();
-        addRobot();
-        addSkyBox();
-        //createHeart();
-        //createHeartsPool();
-
-        //Handle keydown and resize events
-        document.addEventListener('keydown', handleKeyDown, false);
-        // document.addEventListener('keyup', handleKeyRelease, false);
-        window.addEventListener('resize', onWindowResize, false);
-    }
-
-    //----------------------------------------------------------------------------
-    // Sky 
-    //----------------------------------------------------------------------------
-    function addSkyBox() {
-        // Create a Sphere Geometry with a space texture to be applied as background scene 
-        let skyGeo = new THREE.SphereGeometry(worldRadius * 2, 25, 25);
-        let loader = new THREE.TextureLoader(),
-            //todo TROCAR CAMINHO PARA TESTAR DIFERENTES FUNDOS
-            texture = loader.load("textures/milky_way.jpg");
-
-        let material = new THREE.MeshPhongMaterial({
-            map: texture,
-        });
-
-        let sky = new THREE.Mesh(skyGeo, material);
-        sky.material.side = THREE.BackSide;
-        scene.add(sky);
-    }
-
-    //----------------------------------------------------------------------------
-    // Lights and shadows
-    //----------------------------------------------------------------------------
-    function addLight() {
-        var hemisphereLight = new THREE.HemisphereLight(0xfffafa, 0x000000, .9)
-        scene.add(hemisphereLight);
-        sun = new THREE.DirectionalLight(0xcdc1c5, 0.9);
-        sun.position.set(12, 6, -7);
-        sun.castShadow = true;
-        scene.add(sun);
-        //Set up shadow properties for the sun light
-        sun.shadow.mapSize.width = 256;
-        sun.shadow.mapSize.height = 256;
-        sun.shadow.camera.near = 0.5;
-        sun.shadow.camera.far = 50;
-    }
-
-
-
-    //----------------------------------------------------------------------------
-    // Adds the moon to the scene and calls the object's functions
-    //----------------------------------------------------------------------------
-    function addWorld() {
-        var sides = 60;
-        var tiers = 60;
-        var sphereGeometry = new THREE.SphereGeometry(worldRadius, sides, tiers);
-
+        var barrierGeometry = new THREE.BoxGeometry(2, 4, 10);
         // Create a texture phong material for the sphere, with map and bumpMap textures
-        map = new THREE.TextureLoader().load('textures/mercury.jpg');
-        bumpmap = new THREE.TextureLoader().load('textures/mercury.jpg');
-        sphereMaterial = new THREE.MeshPhongMaterial({
-            map: map,
-            bumpMap: bumpmap,
-            bumpScale: 0.05
+        barrierMap = new THREE.TextureLoader().load('textures/barrier.jpg');
+        barrierBumpMap = new THREE.TextureLoader().load('textures/barrier.jpg');
+        barrierMaterial = new THREE.MeshPhongMaterial({
+            map: barrierMap,
+            bumpMap: barrierBumpMap,
+            bumpScale: 0.1
         });
 
-        rollingGroundSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        rollingGroundSphere.receiveShadow = true;
-        rollingGroundSphere.castShadow = false;
-        rollingGroundSphere.rotation.z = -Math.PI / 2;
-        scene.add(rollingGroundSphere);
-        rollingGroundSphere.position.y = -24;
-        rollingGroundSphere.position.z = 2;
-        addWorldHearts();
-        addWorldBarriers();
-        addWorldVirus();
-    }
+        var barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
 
-    //----------------------------------------------------------------------------
-    // Create Heart
-    //----------------------------------------------------------------------------
-    function createHeart() {
-        var heartShape = new THREE.Shape();
-        let heartMaterial = new THREE.MeshBasicMaterial({
-            color: 0xE31B23
-        });
+        //resize barrier
+        barrier.scale.set(0.2, 0.2, .2);
 
-        const x = -2;
-        const y = -5;
-        heartShape.moveTo(x + 2.5, y + 2.5);
-        heartShape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
-        heartShape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        heartShape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        heartShape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-        heartShape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        heartShape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+        //rotate barrier
+        barrier.rotateY(Math.PI / 2);
 
-        var extrudeSettings = {
-            amount: 1,
-            bevelEnabled: true,
-            bevelSegments: 2,
-            steps: 2,
-            depth: 1,
-            bevelSize: 1,
-            bevelThickness: 1
-        };
+        scene.add(barrier);
 
-        var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
-
-        heart = new THREE.Mesh(geometry, heartMaterial);
-
-        //resize heart
-        heart.scale.set(0.1, 0.1, 0.1);
-
-
-        //rotate heart
-        //heart.rotateZ(Math.PI / 2);
-
-        //scene.add(heart);
-
-        return heart;
-    }
-
-    //----------------------------------------------------------------------------
-    // Create Virus
-    //----------------------------------------------------------------------------
-    function createVirus() {
-
+        //----------------------------------------------------------------------------
+        // Add Virus
+        //----------------------------------------------------------------------------
         var virusMaterial = new THREE.MeshPhongMaterial({
             color: 0x4ab897
         });
@@ -304,7 +219,7 @@ window.onload = function () {
             bumpScale: 0.1
         });
 
-        var virus = new THREE.Mesh(mergeGeometry, [sphereMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial]);
+        var virusMesh = new THREE.Mesh(mergeGeometry, [sphereMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial]);
 
         //resize virus
         virus.scale.set(0.15, 0.15, .15);
@@ -312,39 +227,160 @@ window.onload = function () {
         //rotate virus
         //virus.rotateY(-Math.PI / 2);
 
-        return virus;
-    }
+    function addSkyBox() {
+        // Create a Sphere Geometry with a space texture to be applied as background scene 
+        let skyGeo = new THREE.SphereGeometry(worldRadius * 2, 25, 25);
+        let loader = new THREE.TextureLoader(),
+            //todo TROCAR CAMINHO PARA TESTAR DIFERENTES FUNDOS
+            texture = loader.load("textures/space2.png");
 
-    //----------------------------------------------------------------------------
-    // Create Barrier
-    //----------------------------------------------------------------------------
-    function createBarrier() {
-
-        var barrierGeometry = new THREE.BoxGeometry(2, 4, 10);
-        // Create a texture phong material for the sphere, with map and bumpMap textures
-        barrierMap = new THREE.TextureLoader().load('textures/barrier.jpg');
-        barrierBumpMap = new THREE.TextureLoader().load('textures/barrier.jpg');
-        barrierMaterial = new THREE.MeshPhongMaterial({
-            map: barrierMap,
-            bumpMap: barrierBumpMap,
-            bumpScale: 0.1
+        let material = new THREE.MeshPhongMaterial({
+            map: texture,
         });
 
-        var barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+        let sky = new THREE.Mesh(skyGeo, material);
+        sky.material.side = THREE.BackSide;
+        scene.add(sky);
+    }
 
-        //resize barrier
-        barrier.scale.set(0.2, 0.2, .2);
+
+    function addLight() {
+        var hemisphereLight = new THREE.HemisphereLight(0xfffafa, 0x000000, .9)
+        scene.add(hemisphereLight);
+        sun = new THREE.DirectionalLight(0xcdc1c5, 0.9);
+        sun.position.set(12, 6, -7);
+        sun.castShadow = true;
+        scene.add(sun);
+        //Set up shadow properties for the sun light
+        sun.shadow.mapSize.width = 256;
+        sun.shadow.mapSize.height = 256;
+        sun.shadow.camera.near = 0.5;
+        sun.shadow.camera.far = 50;
+    }
+
+
+    //! nao esta a fazer nada - ver se é necessário
+    //! Criar coleção de hearts
+    // function createHeartsPool() {
+    //     var maxHeartsInPool = 0;
+    //     var newHeart;
+    //     for (var i = 0; i < maxHeartsInPool; i++) {
+    //         newHeart = createHeart();
+    //         heartsPool.push(newHeart);
+    //     }
+    // }
+
+
+    function addWorld() {
+        var sides = 60;
+        var tiers = 60;
+        var sphereGeometry = new THREE.SphereGeometry(worldRadius, sides, tiers);
+
+        // Create a texture phong material for the sphere, with map and bumpMap textures
+        map = new THREE.TextureLoader().load('textures/mercury.jpg');
+        bumpmap = new THREE.TextureLoader().load('textures/mercury.jpg');
+        sphereMaterial = new THREE.MeshPhongMaterial({
+            map: map,
+            bumpMap: bumpmap,
+            bumpScale: 0.05
+        });
+
+
 
         //rotate barrier
         //barrier.rotateY(Math.PI / 2);
 
-        return barrier;
+        //   var sphereMaterial = new THREE.Mesh(sphereGeometry, material)
 
+
+        //  var sphereMaterial = new THREE.MeshStandardMaterial({
+        //     color: "#006400",
+        //     shading: THREE.FlatShading
+        //  })
+
+        // var vertexIndex;
+        // var vertexVector = new THREE.Vector3();
+        // var nextVertexVector = new THREE.Vector3();
+        // var firstVertexVector = new THREE.Vector3();
+        // var offset = new THREE.Vector3();
+        // var currentTier = 1;
+        // var lerpValue = 0.5;
+        // var heightValue;
+        // var maxHeight = 0.07;
+        // for (var j = 1; j < tiers - 2; j++) {
+        //     currentTier = j;
+        //     for (var i = 0; i < sides; i++) {
+        //         vertexIndex = (currentTier * sides) + 1;
+        //         vertexVector = sphereGeometry.vertices[i + vertexIndex].clone();
+        //         if (j % 2 !== 0) {
+        //             if (i == 0) {
+        //                 firstVertexVector = vertexVector.clone();
+        //             }
+        //             nextVertexVector = sphereGeometry.vertices[i + vertexIndex + 1].clone();
+        //             if (i == sides - 1) {
+        //                 nextVertexVector = firstVertexVector;
+        //             }
+        //             lerpValue = (Math.random() * (0.75 - 0.25)) + 0.25;
+        //             vertexVector.lerp(nextVertexVector, lerpValue);
+        //         }
+        //         heightValue = (Math.random() * maxHeight) - (maxHeight / 2);
+        //         offset = vertexVector.clone().normalize().multiplyScalar(heightValue);
+        //         sphereGeometry.vertices[i + vertexIndex] = (vertexVector.add(offset));
+        //     }
+        // }
+        rollingGroundSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        rollingGroundSphere.receiveShadow = true;
+        rollingGroundSphere.castShadow = false;
+        rollingGroundSphere.rotation.z = -Math.PI / 2;
+        scene.add(rollingGroundSphere);
+        rollingGroundSphere.position.y = -24;
+        rollingGroundSphere.position.z = 2;
+        addWorldHearts();
     }
 
-    //----------------------------------------------------------------------------
-    //TODO Heart addicional animation 
-    //----------------------------------------------------------------------------
+    function createHeart() {
+        var heartShape = new THREE.Shape();
+        let heartMaterial = new THREE.MeshBasicMaterial({
+            color: 0xE31B23
+        });
+
+        const x = -2;
+        const y = -5;
+        heartShape.moveTo(x + 2.5, y + 2.5);
+        heartShape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+        heartShape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+        heartShape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+        heartShape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+        heartShape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+        heartShape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+
+        var extrudeSettings = {
+            amount: 1,
+            bevelEnabled: true,
+            bevelSegments: 2,
+            steps: 2,
+            depth: 1,
+            bevelSize: 1,
+            bevelThickness: 1
+        };
+
+        var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
+
+        heart = new THREE.Mesh(geometry, heartMaterial);
+
+        //resize heart
+        heart.scale.set(0.1, 0.1, 0.1);
+
+
+        //rotate heart
+        heart.rotateZ(Math.PI / 2);
+
+        //scene.add(heart);
+
+        return heart;
+    }
+
+    //Heart animation
     // function rotateHeart() {
     //     heart.rotation.z -= heartRotationSpeed;
     //     if (up) {
@@ -363,15 +399,27 @@ window.onload = function () {
     //         heart.position.set(0, 0, 0)
 
     //     }
+
+
     // }
 
 
-    //----------------------------------------------------------------------------
-    // Adds hearts to the scene based on the number of hearts and the gap between them
-    //----------------------------------------------------------------------------
+    //! nao esta a fazer nada - ver se é necessário
+    // function addPathHeart() {
+    //     var options = [0, 1, 2];
+    //     var lane = Math.floor(Math.random() * 3);
+    //     addHeart(true, lane);
+    //     options.splice(lane, 1);
+    //     if (Math.random() > 0.5) {
+    //         lane = Math.floor(Math.random() * 2);
+    //         addHeart(true, options[lane]);
+
+    //     }
+    // }
+
     function addWorldHearts() {
-        var numHearts = 10; //36
-        var gap = 6.28 / 10; //6.28 / 36
+        var numHearts = 36;
+        var gap = 6.28 / 36;
         // var gap=6.28/ 36;
         for (var i = 0; i < numHearts; i++) {
             addHeart(false, i * gap, true);
@@ -389,6 +437,7 @@ window.onload = function () {
             if (heartsPool.length == 0) return;
             newHeart = heartsPool.pop();
             newHeart.visible = true;
+            //console.log("add heart");
             heartsInPath.push(newHeart);
             // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
         } else {
@@ -396,7 +445,7 @@ window.onload = function () {
             // Define Left and Right position of the heart object
             var forestAreaAngle = 0; //[1.52,1.57,1.62];
             if (isLeft) {
-                forestAreaAngle = 1.68 + Math.random() * 0.3;
+                forestAreaAngle = 1.68 + Math.random() * 0.1;
             } else {
                 forestAreaAngle = 1.46 - Math.random() * 0.1;
             }
@@ -529,9 +578,42 @@ window.onload = function () {
             })
     }
 
-    //----------------------------------------------------------------------------
-    //  Function to handle pressed keys by the user 
-    //----------------------------------------------------------------------------
+
+    function updateScoreAndHealth() {
+        if (score >= 1000) {
+            score++;
+        }
+
+    }
+
+    function addScoreAndHealth() {
+        let loader = new THREE.FontLoader();
+        loader.load('fonts/font.json', data => {
+            font = data;
+            let text = 'Score: ' + score;
+            let geo = new THREE.TextGeometry(text, {
+                font: font,
+                size: 0.3,
+                height: 0.05
+            })
+
+            let material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+            let scoreMesh = new THREE.Mesh(geo, material);
+            scoreMesh.position.x = worldRadius - 26.8;
+            scoreMesh.position.y = 5;
+            scoreMesh.position.z = 1;
+            // scoreMesh.rotateY(Math.PI / 2)
+            scene.add(scoreMesh)
+
+
+        })
+    }
+
+
+
+    // Function to handle pressed keys by the user 
     function handleKeyDown(e) {
         let keyCode = e.which
         // Jump animation
@@ -578,9 +660,6 @@ window.onload = function () {
         }
     }
 
-    //----------------------------------------------------------------------------
-    //  Function to handle released keys 
-    //----------------------------------------------------------------------------
     function handleKeyRelease(e) {
         let keyCode = e.which;
         // Jump animation
@@ -594,9 +673,6 @@ window.onload = function () {
         }
     }
 
-    //----------------------------------------------------------------------------
-    //  Function to handle colisions 
-    //----------------------------------------------------------------------------
     function detectCollision() {
         // let originPoint = robot.position.clone();
         // console.log(originPoint);
@@ -608,9 +684,6 @@ window.onload = function () {
         }
     }
 
-    //----------------------------------------------------------------------------
-    //  Function to handle window resizes 
-    //----------------------------------------------------------------------------
     function onWindowResize() {
         //resize & align
         sceneHeight = window.innerHeight;
@@ -624,17 +697,13 @@ window.onload = function () {
         //animate
         //Ground animation
         rollingGroundSphere.rotation.x += rollingSpeed;
-
         requestAnimationFrame(update); //request next update
-
+        setInterval(updateScoreAndHealth(), 1000);
         /***FABIO*/
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
         render();
-
-
     }
-
 
     function render() {
         // rotateHeart();
