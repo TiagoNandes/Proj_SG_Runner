@@ -11,8 +11,8 @@
 // var orbitControl;
 // var worldRadius = 25;
 // var rollingSpeed = 0.005;
- var heartRotationSpeed = 1;
- let up = true;
+var heartRotationSpeed = 1;
+let up = true;
 // var heartsInPath;
 // var heartsPool;
 // var sphericalHelper;
@@ -307,13 +307,13 @@ function addLight() {
 
 
 //Criar coleção de hearts
-function createHeartsPool(){
-	var maxHeartsInPool=10;
-	var newHeart;
-	for(var i=0; i<maxHeartsInPool;i++){
-		newHeart=createHeart();
-		heartsPool.push(newHeart);
-	}
+function createHeartsPool() {
+    var maxHeartsInPool = 10;
+    var newHeart;
+    for (var i = 0; i < maxHeartsInPool; i++) {
+        newHeart = createHeart();
+        heartsPool.push(newHeart);
+    }
 }
 
 
@@ -379,12 +379,12 @@ function addWorld() {
 
 
     // Create a texture phong material for the sphere, with map and bumpMap textures
-    map = new THREE.TextureLoader().load('textures/moon_texture.jpg');
-    bumpmap = new THREE.TextureLoader().load('textures/moon_texture.jpg');
+    map = new THREE.TextureLoader().load('textures/2kmercury.jpg');
+    bumpmap = new THREE.TextureLoader().load('textures/2kmercury.jpg');
     sphereMaterial = new THREE.MeshPhongMaterial({
         map: map,
         bumpMap: bumpmap,
-        bumpScale: 0.05
+        bumpScale: 0.01
     });
 
 
@@ -470,11 +470,11 @@ function createHeart() {
     heart = new THREE.Mesh(geometry, heartMaterial);
 
     //resize heart
-    heart.scale.set(0.1, 0.1, 0.1);
+    heart.scale.set(0.05, 0.05, 0.05);
 
 
     //rotate heart
-    heart.rotateZ(Math.PI / 2 );
+    //heart.rotateZ(-Math.PI / 2 );
 
     //scene.add(heart);
 
@@ -506,53 +506,55 @@ function createHeart() {
 
 
 //ver melhor o que isto faz 
-function addPathHeart(){
-	var options=[0,1,2];
-    var lane= Math.floor(Math.random()*3);
-	addHeart(true,lane);
-	options.splice(lane,1);
-	if(Math.random()>0.5){
-		lane= Math.floor(Math.random()*2);
-        addHeart(true,options[lane]);
-        
-	}
+function addPathHeart() {
+    var options = [0, 1, 2];
+    var lane = Math.floor(Math.random() * 3);
+    addHeart(true, lane);
+    options.splice(lane, 1);
+    if (Math.random() > 0.5) {
+        lane = Math.floor(Math.random() * 2);
+        addHeart(true, options[lane]);
+
+    }
 }
 
-function addWorldHearts(){
-	var numHearts=36;
-    var gap=6.28/ 36;
+function addWorldHearts() {
+    var numHearts = 36;
+    var gap = 6.28 / 36;
     // var gap=6.28/ 36;
-	for(var i=0;i<numHearts;i++){
-		addHeart(false,i*gap, true);
-		addHeart(false,i*gap, false);
-	}
+    for (var i = 0; i < numHearts; i++) {
+        addHeart(false, i * gap, true);
+        addHeart(false, i * gap, false);
+    }
 }
-function addHeart(inPath, row, isLeft){
-	var newHeart;
-	if(inPath){
-		if(heartsPool.length==0)return;
-		newHeart=heartsPool.pop();
-		newHeart.visible=true;
-		//console.log("add heart");
-		heartsInPath.push(newHeart);
-		sphericalHelper.set( worldRadius-0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x+4 );
-	}else{
-		newHeart=createHeart();
-		var forestAreaAngle=0;//[1.52,1.57,1.62];
-		if(isLeft){
-            forestAreaAngle=1.68+Math.random()*0.1;
-		}else{
-			forestAreaAngle=1.46-Math.random()*0.1;
-		}
-		sphericalHelper.set( worldRadius + 0.5, forestAreaAngle, row );
-	}
-	newHeart.position.setFromSpherical( sphericalHelper );
-	var rollingGroundVector=rollingGroundSphere.position.clone().normalize();
-	var heartVector=newHeart.position.clone().normalize();
-    newHeart.quaternion.setFromUnitVectors(heartVector,rollingGroundVector);
-    newHeart.rotation.x+=(Math.random()*(2*Math.PI/10))+-Math.PI/10;
-	
-	rollingGroundSphere.add(newHeart);
+
+function addHeart(inPath, row, isLeft) {
+    var newHeart;
+    if (inPath) {
+        if (heartsPool.length == 0) return;
+        newHeart = heartsPool.pop();
+        newHeart.visible = true;
+        //console.log("add heart");
+        heartsInPath.push(newHeart);
+        sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+    } else {
+        newHeart = createHeart();
+        var forestAreaAngle = 0; //[1.52,1.57,1.62];
+        if (isLeft) {
+            forestAreaAngle = 1.68 + Math.random() * 0.1;
+        } else {
+            forestAreaAngle = 1.46 - Math.random() * 0.1;
+        }
+        sphericalHelper.set(worldRadius + 0.5, forestAreaAngle, row);
+    }
+    newHeart.position.setFromSpherical(sphericalHelper);
+    var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+    var heartVector = newHeart.position.clone().normalize();
+    newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
+    newHeart.rotation.y += -((Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10);
+    
+
+    rollingGroundSphere.add(newHeart);
 }
 
 
