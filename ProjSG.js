@@ -84,6 +84,7 @@ window.onload = function () {
         addScore();
         //createHeart();
         //createHeartsPool();
+        setInterval(updateScore, 1000);
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
@@ -576,7 +577,7 @@ window.onload = function () {
 
     function updateScore() {
         if (score >= 1000) {
-            score++;
+            score += 5;
         }
 
     }
@@ -683,12 +684,10 @@ window.onload = function () {
     function update() {
         //animate
         //Ground animation
-
         rollingGroundSphere.rotation.x += rollingSpeed;
-        console.log("AQUI: " + rollingSpeed);
         requestAnimationFrame(update); //request next update
-        setInterval(updateScore(), 1000);
-        /***FABIO*/
+
+
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
         render();
