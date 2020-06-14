@@ -67,7 +67,7 @@ window.onload = function () {
         treesInPath = [];
         treesPool = [];
         clock = new THREE.Clock();
-        clock.start();
+
         heroRollingSpeed = (rollingSpeed * worldRadius / heroRadius) / 5;
         sphericalHelper = new THREE.Spherical();
 
@@ -75,7 +75,7 @@ window.onload = function () {
         scene = new THREE.Scene();
         sceneWidth = window.innerWidth;
         sceneHeight = window.innerHeight;
-        scene.fog = new THREE.FogExp2(0xf0fff0, 0.14); //enable fog
+        // scene.fog = new THREE.FogExp2(0xf0fff0, 0.14); //enable fog
         camera = new THREE.PerspectiveCamera(60, sceneWidth / sceneHeight, 0.1, 1000); //perspective camera
 
         //Renderer
@@ -89,20 +89,12 @@ window.onload = function () {
         dom = document.getElementById('gameContainer');
         dom.appendChild(renderer.domElement);
 
-        // Call Functions to add the components of the game
-        // createHeartsPool();
-        addWorld();
-        addLight();
-        addRobot();
-        //createHeart();
-        //createHeartsPool();
-
         camera.position.z = 10.5;
         camera.position.y = 5.5;
 
         //Helping grid
-        var gridXZ = new THREE.GridHelper(100, 10);
-        scene.add(gridXZ);
+        // var gridXZ = new THREE.GridHelper(100, 10);
+        // scene.add(gridXZ);
 
         //----------------------------------------------------------------------------
         // Add Barrier
@@ -258,14 +250,41 @@ window.onload = function () {
 
         orbitControl = new THREE.OrbitControls(camera, renderer.domElement); //helper to rotate around in scene
         orbitControl.addEventListener('change', render);
-        orbitControl.enableZoom = false;
+        // Disable zoom functionality
+        orbitControl.enableZoom = true;
 
+
+        // Call Functions to add the components of the game
+        // createHeartsPool();
+        addWorld();
+        addLight();
+        addRobot();
+        addSkyBox();
+        //createHeart();
+        //createHeartsPool();
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
         // document.addEventListener('keyup', handleKeyRelease, false);
         window.addEventListener('resize', onWindowResize, false);
     }
+
+    function addSkyBox() {
+        // Create a Sphere Geometry with a space texture to be applied as background scene 
+        let skyGeo = new THREE.SphereGeometry(worldRadius * 2, 25, 25);
+        let loader = new THREE.TextureLoader(),
+            //todo TROCAR CAMINHO PARA TESTAR DIFERENTES FUNDOS
+            texture = loader.load("textures/space2.png");
+
+        let material = new THREE.MeshPhongMaterial({
+            map: texture,
+        });
+
+        let sky = new THREE.Mesh(skyGeo, material);
+        sky.material.side = THREE.BackSide;
+        scene.add(sky);
+    }
+
 
     function addLight() {
         var hemisphereLight = new THREE.HemisphereLight(0xfffafa, 0x000000, .9)
@@ -477,6 +496,7 @@ window.onload = function () {
         rollingGroundSphere.add(newHeart);
     }
 
+
     function addRobot() {
         loader = new THREE.GLTFLoader();
         loader.load('models/GLTF/RobotExpressive.glb',
@@ -513,9 +533,8 @@ window.onload = function () {
             let clip = THREE.AnimationClip.findByName(animations, state.name);
             let action = mixer.clipAction(clip);
             action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
-            robot.position.y = 3;
             action.play();
-
+            robot.position.y = 2.5;
 
             setTimeout(function () {
                 robot.position.y = 2;
