@@ -82,7 +82,7 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
-        addScoreAndHealth();
+        addScore();
         //createHeart();
         //createHeartsPool();
 
@@ -442,12 +442,12 @@ window.onload = function () {
         // var gap=6.28/ 36;
         for (var i = 0; i < numHearts; i++) {
             var rnd = Math.random();
-            if(rnd >= 0.5){
+            if (rnd >= 0.5) {
                 addHeart(false, i * gap, true);
-            }else{
+            } else {
                 addHeart(false, i * gap, false);
             }
-            
+
         }
     }
 
@@ -601,15 +601,7 @@ window.onload = function () {
             })
     }
 
-
-    function updateScoreAndHealth() {
-        if (score >= 1000) {
-            score++;
-        }
-
-    }
-
-    function addScoreAndHealth() {
+    function addScore() {
         let loader = new THREE.FontLoader();
         loader.load('fonts/font.json', data => {
             font = data;
@@ -634,6 +626,12 @@ window.onload = function () {
         })
     }
 
+    function updateScore() {
+        if (score >= 1000) {
+            score++;
+        }
+
+    }
 
     //----------------------------------------------------------------------------
     //  Function to handle pressed keys by the user 
@@ -727,12 +725,21 @@ window.onload = function () {
         camera.updateProjectionMatrix();
     }
 
+    function updateRollingSpeed() {
+        if (rollingSpeed > 1) {
+            rollingSpeed += 0.01
+        }
+
+    }
+
     function update() {
         //animate
         //Ground animation
+
         rollingGroundSphere.rotation.x += rollingSpeed;
+        console.log("AQUI: " + rollingSpeed);
         requestAnimationFrame(update); //request next update
-        setInterval(updateScoreAndHealth(), 1000);
+        setInterval(updateScore(), 1000);
         /***FABIO*/
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
