@@ -243,7 +243,7 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     function createHeart() {
         var heartShape = new THREE.Shape();
-        let heartMaterial = new THREE.MeshBasicMaterial({
+        let heartMaterial = new THREE.MeshPhongMaterial({
             color: 0xE31B23
         });
 
@@ -451,12 +451,17 @@ window.onload = function () {
     // Adds hearts to the scene based on the number of hearts and the gap between them
     //----------------------------------------------------------------------------
     function addWorldHearts() {
-        var numHearts = 10; //36
-        var gap = 6.28 / 10; //6.28 / 36
+        var numHearts = 26; //36
+        var gap = 6.28 / 26; //6.28 / 36
         // var gap=6.28/ 36;
         for (var i = 0; i < numHearts; i++) {
-            addHeart(false, i * gap, true);
-            addHeart(false, i * gap, false);
+            var rnd = Math.random();
+            if(rnd >= 0.5){
+                addHeart(false, i * gap, true);
+            }else{
+                addHeart(false, i * gap, false);
+            }
+            
         }
     }
 
@@ -477,9 +482,9 @@ window.onload = function () {
             // Define Left and Right position of the heart object
             var forestAreaAngle = 0; //[1.52,1.57,1.62];
             if (isLeft) {
-                forestAreaAngle = 1.68 + Math.random() * 0.3;
+                forestAreaAngle = Math.random() * (1.75 - 1.6) + 1.6; //1.68 + Math.random() * 0.3
             } else {
-                forestAreaAngle = 1.46 - Math.random() * 0.1;
+                forestAreaAngle = Math.random() * (1.4 - 1.54) + 1.54; //1.46 - Math.random() * 0.1
             }
             sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
         }
