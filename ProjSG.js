@@ -648,7 +648,6 @@ window.onload = function () {
         rollingGroundSphere.rotation.x += rollingSpeed;
         requestAnimationFrame(update); //request next update
         setInterval(updateScoreAndHealth(), 1000);
-
         /***FABIO*/
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
