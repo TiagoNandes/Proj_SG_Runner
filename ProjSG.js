@@ -58,8 +58,8 @@ window.onload = function () {
         //----------------------------------------------------------------------------
         // Camera position
         //----------------------------------------------------------------------------
-        camera.position.z = 11.6;
-        camera.position.y = 2.3;
+        camera.position.z = 12.85;
+        camera.position.y = 2.55;
 
         //Helping grid
         // var gridXZ = new THREE.GridHelper(100, 10);
@@ -214,7 +214,7 @@ window.onload = function () {
         // Allow heart object to cast shadow
         heart.castShadow = true;
         //resize heart
-        heart.scale.set(0.1, 0.1, 0.1);
+        heart.scale.set(0.07, 0.07, 0.07);
 
         return heart;
     }
@@ -323,7 +323,7 @@ window.onload = function () {
         var virus = new THREE.Mesh(mergeGeometry, [sphereMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial]);
 
         //resize virus
-        virus.scale.set(0.15, 0.15, .15);
+        virus.scale.set(0.1, 0.1, 0.1);
         // Allow virus object to cast shadow
         virus.castShadow = true;
 
@@ -407,14 +407,14 @@ window.onload = function () {
 
         newHeart = createHeart();
         // Define Left and Right position of the heart object
-        //Values: Max left=1.75 || Middle=1.57 || Max right=1.4
+        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
         var forestAreaAngle = 0;
         if (isLeft) {
-            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
-        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+        sphericalHelper.set(worldRadius + .5, forestAreaAngle, row);
 
         newHeart.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -426,11 +426,11 @@ window.onload = function () {
     }
 
     //----------------------------------------------------------------------------
-    // Adds barriers to the scene based on the number of hearts and the gap between them
+    // Adds barriers to the scene based on the number of barriers and the gap between them
     //----------------------------------------------------------------------------
     function addWorldBarriers() {
-        var numBarriers = 15; //36
-        var gap = 6.28 / 15; //6.28 / 36
+        var numBarriers = 36; //36
+        var gap = 9.28 / 36; //6.28 / 36
         // var gap=6.28/ 36;
         for (var i = 0; i < numBarriers; i++) {
             addBarrier(false, i * gap, true);
@@ -445,14 +445,15 @@ window.onload = function () {
         var newBarrier;
 
         newBarrier = createBarrier();
-        // Define Left and Right position of the heart object
-        var forestAreaAngle = 0; //[1.52,1.57,1.62];
+        // Define Left and Right position of the barrier object
+        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
+        var forestAreaAngle = 0;
         if (isLeft) {
-            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
-        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+        sphericalHelper.set(worldRadius + .3, forestAreaAngle, row);
 
         newBarrier.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -465,11 +466,11 @@ window.onload = function () {
 
 
     //----------------------------------------------------------------------------
-    // Adds virus to the scene based on the number of hearts and the gap between them
+    // Adds virus to the scene based on the number of virus and the gap between them
     //----------------------------------------------------------------------------
     function addWorldVirus() {
-        var numVirus = 15; //36
-        var gap = 9.28 / 15; //6.28 / 36
+        var numVirus = 36; //36
+        var gap = 5.28 / 36; //6.28 / 36
         // var gap=6.28/ 36;
         for (var i = 0; i < numVirus; i++) {
             addVirus(false, i * gap, true);
@@ -484,14 +485,15 @@ window.onload = function () {
         var newVirus;
 
         newVirus = createVirus();
-        // Define Left and Right position of the heart object
-        var forestAreaAngle = 0; //[1.52,1.57,1.62];
+        // Define Left and Right position of the virus object
+        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
+        var forestAreaAngle = 0;
         if (isLeft) {
-            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
-        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+        sphericalHelper.set(worldRadius + .5, forestAreaAngle, row);
 
         newVirus.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -600,13 +602,18 @@ window.onload = function () {
         }
         // Robot move left - PRESS A 
         if (keyCode == 65) {
-            robot.position.x -= 0.08
-            robot.rotation.y = -2.8;
+            if (robot.position.x > -4) {
+                robot.position.x -= 0.15;
+                robot.rotation.y = -2.8;
+            }
+
         }
         // Robot move right - PRESS D
         if (keyCode == 68) {
-            robot.position.x += 0.08
-            robot.rotation.y = 2.8;
+            if (robot.position.x < 4) {
+                robot.position.x += 0.15;
+                robot.rotation.y = 2.8;
+            }
 
         }
     }
@@ -663,7 +670,6 @@ window.onload = function () {
 
     function update() {
         //Ground animation
-
         rollingGroundSphere.rotation.x += rollingSpeed;
         console.log("AQUI: " + rollingSpeed);
         requestAnimationFrame(update); //request next update
