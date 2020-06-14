@@ -82,6 +82,7 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
+        addScoreAndHealth();
         //createHeart();
         //createHeartsPool();
 
