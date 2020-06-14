@@ -1,5 +1,5 @@
 window.onload = function () {
-    var sceneWidth, sceneHeight, rollingGroundSphere, dom, sun, camera, scene, renderer, sphericalHelper, pathAngleValues;
+    var sceneWidth, sceneHeight, rollingGroundSphere, dom, sun, camera, scene, renderer, sphericalHelper;
     var heartsInPath, heartsPool, hasCollided, up;
     var orbitControl;
     var rollingSpeed = 0.003;
@@ -31,7 +31,6 @@ window.onload = function () {
         //vars
         heartsInPath = [];
         heartsPool = [];
-        pathAngleValues = [1.52, 1.57, 1.62];
         sphericalHelper = new THREE.Spherical();
 
         clock = new THREE.Clock();
@@ -59,8 +58,8 @@ window.onload = function () {
         //----------------------------------------------------------------------------
         // Camera position
         //----------------------------------------------------------------------------
-        camera.position.z = 10.5;
-        camera.position.y = 5.5;
+        camera.position.z = 11.6;
+        camera.position.y = 2.3;
 
         //Helping grid
         // var gridXZ = new THREE.GridHelper(100, 10);
@@ -99,7 +98,7 @@ window.onload = function () {
         let skyGeo = new THREE.SphereGeometry(worldRadius * 2, 25, 25);
         let loader = new THREE.TextureLoader(),
             //todo TROCAR CAMINHO PARA TESTAR DIFERENTES FUNDOS
-            texture = loader.load("textures/milky_way.jpg");
+            texture = loader.load("textures/2k_milky_way.jpg");
 
         let material = new THREE.MeshPhongMaterial({
             map: texture,
@@ -137,8 +136,8 @@ window.onload = function () {
         var sphereGeometry = new THREE.SphereGeometry(worldRadius, sides, tiers);
 
         // Create a texture phong material for the sphere, with map and bumpMap textures
-        map = new THREE.TextureLoader().load('textures/mercury.jpg');
-        bumpmap = new THREE.TextureLoader().load('textures/mercury.jpg');
+        map = new THREE.TextureLoader().load('textures/2kmercury.jpg');
+        bumpmap = new THREE.TextureLoader().load('textures/2kmercury.jpg');
         sphereMaterial = new THREE.MeshPhongMaterial({
             map: map,
             bumpMap: bumpmap,
@@ -188,7 +187,7 @@ window.onload = function () {
         heart = new THREE.Mesh(geometry, heartMaterial);
 
         //resize heart
-        heart.scale.set(0.1, 0.1, 0.1);
+        heart.scale.set(0.03, 0.03, 0.03);
 
 
         //rotate heart
@@ -373,7 +372,7 @@ window.onload = function () {
         var virus = new THREE.Mesh(mergeGeometry, [sphereMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial, virusMaterial, redMaterial]);
 
         //resize virus
-        virus.scale.set(0.15, 0.15, .15);
+        virus.scale.set(0.1, 0.1, .1);
 
         //rotate virus
         //virus.rotateY(-Math.PI / 2);
@@ -399,7 +398,7 @@ window.onload = function () {
         var barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
 
         //resize barrier
-        barrier.scale.set(0.2, 0.2, .2);
+        barrier.scale.set(0.15, 0.15, 0.15);
 
         //rotate barrier
         //barrier.rotateY(Math.PI / 2);
@@ -441,12 +440,12 @@ window.onload = function () {
         // var gap=6.28/ 36;
         for (var i = 0; i < numHearts; i++) {
             var rnd = Math.random();
-            if(rnd >= 0.5){
+            if (rnd >= 0.5) {
                 addHeart(false, i * gap, true);
-            }else{
+            } else {
                 addHeart(false, i * gap, false);
             }
-            
+
         }
     }
 
@@ -456,23 +455,18 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     function addHeart(inPath, row, isLeft) {
         var newHeart;
-        if (inPath) {
-            if (heartsPool.length == 0) return;
-            newHeart = heartsPool.pop();
-            newHeart.visible = true;
-            heartsInPath.push(newHeart);
-            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+
+        newHeart = createHeart();
+        // Define Left and Right position of the heart object
+        //Values: Max left=1.75 || Middle=1.57 || Max right=1.4
+        var forestAreaAngle = 0;
+        if (isLeft) {
+            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            newHeart = createHeart();
-            // Define Left and Right position of the heart object
-            var forestAreaAngle = 0; //[1.52,1.57,1.62];
-            if (isLeft) {
-                forestAreaAngle = Math.random() * (1.75 - 1.6) + 1.6; //1.68 + Math.random() * 0.3
-            } else {
-                forestAreaAngle = Math.random() * (1.4 - 1.54) + 1.54; //1.46 - Math.random() * 0.1
-            }
-            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
+        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+
         newHeart.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
         var heartVector = newHeart.position.clone().normalize();
@@ -500,23 +494,17 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     function addBarrier(inPath, row, isLeft) {
         var newBarrier;
-        if (inPath) {
-            if (barriersPool.length == 0) return;
-            newBarrier = barriersPool.pop();
-            newBarrier.visible = true;
-            barriersInPath.push(newBarrier);
-            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+
+        newBarrier = createBarrier();
+        // Define Left and Right position of the heart object
+        var forestAreaAngle = 0; //[1.52,1.57,1.62];
+        if (isLeft) {
+            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            newBarrier = createBarrier();
-            // Define Left and Right position of the heart object
-            var forestAreaAngle = 0; //[1.52,1.57,1.62];
-            if (isLeft) {
-                forestAreaAngle = 1.68 + Math.random() * 0.3;
-            } else {
-                forestAreaAngle = 1.46 - Math.random() * 0.1;
-            }
-            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
+        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+
         newBarrier.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
         var barrierVector = newBarrier.position.clone().normalize();
@@ -545,23 +533,17 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     function addVirus(inPath, row, isLeft) {
         var newVirus;
-        if (inPath) {
-            if (virusPool.length == 0) return;
-            newVirus = virusPool.pop();
-            newVirus.visible = true;
-            virusInPath.push(newVirus);
-            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+
+        newVirus = createVirus();
+        // Define Left and Right position of the heart object
+        var forestAreaAngle = 0; //[1.52,1.57,1.62];
+        if (isLeft) {
+            forestAreaAngle = Math.random() * (1.75 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
         } else {
-            newVirus = createVirus();
-            // Define Left and Right position of the heart object
-            var forestAreaAngle = 0; //[1.52,1.57,1.62];
-            if (isLeft) {
-                forestAreaAngle = 1.68 + Math.random() * 0.3;
-            } else {
-                forestAreaAngle = 1.46 - Math.random() * 0.1;
-            }
-            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+            forestAreaAngle = Math.random() * (1.4 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
         }
+        sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
+
         newVirus.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
         var virusVector = newVirus.position.clone().normalize();
@@ -583,10 +565,9 @@ window.onload = function () {
                 animations = gltf.animations;
                 scene.add(robot);
                 // Set positions 
-                robot.position.y = 2;
-                robot.position.z = 1;
+                robot.position.y = 1.05;
+                robot.position.z = 9;
                 robot.scale.set(0.3, 0.3, 0.3);
-                camera.position.z = 5;
 
                 // Rotation
                 robot.rotation.y = Math.PI;
@@ -727,7 +708,6 @@ window.onload = function () {
     }
 
     function update() {
-        //animate
         //Ground animation
         rollingGroundSphere.rotation.x += rollingSpeed;
         requestAnimationFrame(update); //request next update
