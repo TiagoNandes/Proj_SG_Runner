@@ -48,6 +48,7 @@ window.onload = function () {
 
 
     function init() {
+
         // set up the scene
         createScene();
         //call game loop
@@ -89,7 +90,7 @@ window.onload = function () {
         dom.appendChild(renderer.domElement);
 
         // Call Functions to add the components of the game
-        createHeartsPool();
+        // createHeartsPool();
         addWorld();
         addLight();
         addRobot();
@@ -262,6 +263,7 @@ window.onload = function () {
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
+        // document.addEventListener('keyup', handleKeyRelease, false);
         window.addEventListener('resize', onWindowResize, false);
     }
 
@@ -280,15 +282,16 @@ window.onload = function () {
     }
 
 
-    //Criar coleção de hearts
-    function createHeartsPool() {
-        var maxHeartsInPool = 10;
-        var newHeart;
-        for (var i = 0; i < maxHeartsInPool; i++) {
-            newHeart = createHeart();
-            heartsPool.push(newHeart);
-        }
-    }
+    //! nao esta a fazer nada - ver se é necessário
+    //! Criar coleção de hearts
+    // function createHeartsPool() {
+    //     var maxHeartsInPool = 0;
+    //     var newHeart;
+    //     for (var i = 0; i < maxHeartsInPool; i++) {
+    //         newHeart = createHeart();
+    //         heartsPool.push(newHeart);
+    //     }
+    // }
 
 
     function addWorld() {
@@ -297,8 +300,8 @@ window.onload = function () {
         var sphereGeometry = new THREE.SphereGeometry(worldRadius, sides, tiers);
 
         // Create a texture phong material for the sphere, with map and bumpMap textures
-        map = new THREE.TextureLoader().load('textures/moon_texture.jpg');
-        bumpmap = new THREE.TextureLoader().load('textures/moon_texture.jpg');
+        map = new THREE.TextureLoader().load('textures/mercury.jpg');
+        bumpmap = new THREE.TextureLoader().load('textures/mercury.jpg');
         sphereMaterial = new THREE.MeshPhongMaterial({
             map: map,
             bumpMap: bumpmap,
@@ -358,7 +361,6 @@ window.onload = function () {
 
     function createHeart() {
         var heartShape = new THREE.Shape();
-
         let heartMaterial = new THREE.MeshBasicMaterial({
             color: 0xE31B23
         });
@@ -423,18 +425,18 @@ window.onload = function () {
     // }
 
 
-    //ver melhor o que isto faz 
-    function addPathHeart() {
-        var options = [0, 1, 2];
-        var lane = Math.floor(Math.random() * 3);
-        addHeart(true, lane);
-        options.splice(lane, 1);
-        if (Math.random() > 0.5) {
-            lane = Math.floor(Math.random() * 2);
-            addHeart(true, options[lane]);
+    //! nao esta a fazer nada - ver se é necessário
+    // function addPathHeart() {
+    //     var options = [0, 1, 2];
+    //     var lane = Math.floor(Math.random() * 3);
+    //     addHeart(true, lane);
+    //     options.splice(lane, 1);
+    //     if (Math.random() > 0.5) {
+    //         lane = Math.floor(Math.random() * 2);
+    //         addHeart(true, options[lane]);
 
-        }
-    }
+    //     }
+    // }
 
     function addWorldHearts() {
         var numHearts = 36;
@@ -454,16 +456,17 @@ window.onload = function () {
             newHeart.visible = true;
             //console.log("add heart");
             heartsInPath.push(newHeart);
-            sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
+            // sphericalHelper.set(worldRadius - 0.3, pathAngleValues[row], -rollingGroundSphere.rotation.x + 4);
         } else {
             newHeart = createHeart();
+            // Define Left and Right position of the heart object
             var forestAreaAngle = 0; //[1.52,1.57,1.62];
             if (isLeft) {
                 forestAreaAngle = 1.68 + Math.random() * 0.1;
             } else {
                 forestAreaAngle = 1.46 - Math.random() * 0.1;
             }
-            sphericalHelper.set(worldRadius + 0.5, forestAreaAngle, row);
+            sphericalHelper.set(worldRadius + 1, forestAreaAngle, row);
         }
         newHeart.position.setFromSpherical(sphericalHelper);
         var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -510,8 +513,13 @@ window.onload = function () {
             let clip = THREE.AnimationClip.findByName(animations, state.name);
             let action = mixer.clipAction(clip);
             action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
+            robot.position.y = 3;
             action.play();
 
+
+            setTimeout(function () {
+                robot.position.y = 2;
+            }, 500);
         }
         // Running animation - PRESS W TO START
         if (keyCode == 87) {
@@ -521,8 +529,8 @@ window.onload = function () {
             let action = mixer.clipAction(clip);
             action.play();
         }
-        // Death animation - PRESS D 
-        if (keyCode == 68) {
+        // Death animation - PRESS M
+        if (keyCode == 77) {
             state.name = 'Death'
             mixer = new THREE.AnimationMixer(robot);
             let clip = THREE.AnimationClip.findByName(animations, state.name);
@@ -530,20 +538,41 @@ window.onload = function () {
             action.setLoop(THREE.LoopOnce)
             action.play();
         }
+        // Robot move left - PRESS A 
+        if (keyCode == 65) {
+            robot.position.x -= 0.08
+            robot.rotation.y = -2.8;
+        }
+        // Robot move right - PRESS D
+        if (keyCode == 68) {
+            robot.position.x += 0.08
+            robot.rotation.y = 2.8;
+
+        }
+    }
+
+    function handleKeyRelease(e) {
+        let keyCode = e.which;
+        // Jump animation
+        if (keyCode == 32) {
+            robot.position.y = 2;
+            state.name = 'Running'
+            mixer = new THREE.AnimationMixer(robot);
+            let clip = THREE.AnimationClip.findByName(animations, state.name);
+            let action = mixer.clipAction(clip);
+            action.play();
+        }
     }
 
     function detectCollision() {
         // let originPoint = robot.position.clone();
         // console.log(originPoint);
-
         let robotBox = new THREE.Box3().setFromObject(robot);
         for (let i = 0; i < obstacles.length; i++) {
-            let obstBox = new THREE.Box3().setFromObject(obstacles[i]);
+            // let obstBox = new THREE.Box3().setFromObject(obstacles[i]);
             let collision = robotBox.intersectsBox(obstBox);
-            if (collision)
-                return true;
+            return false;
         }
-        return false;
     }
 
     function onWindowResize() {
