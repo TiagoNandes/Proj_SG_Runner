@@ -212,16 +212,10 @@ window.onload = function () {
         var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
 
         heart = new THREE.Mesh(geometry, heartMaterial);
+        // Allow heart object to cast shadow
         heart.castShadow = true;
-
         //resize heart
         heart.scale.set(0.1, 0.1, 0.1);
-
-
-        //rotate heart
-        //heart.rotateZ(Math.PI / 2);
-
-        //scene.add(heart);
 
         return heart;
     }
@@ -299,7 +293,6 @@ window.onload = function () {
         torus8.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 6.2));
         torus8.rotateX((Math.PI / 2) - (3 * Math.PI / 4));
 
-
         //merge geometries 
         var mergeGeometry = new THREE.Geometry();
         mergeGeometry.merge(sphereGeometry, sphereGeometry.matrix);
@@ -332,9 +325,8 @@ window.onload = function () {
 
         //resize virus
         virus.scale.set(0.15, 0.15, .15);
-
-        //rotate virus
-        //virus.rotateY(-Math.PI / 2);
+        // Allow virus object to cast shadow
+        virus.castShadow = true;
 
         return virus;
     }
@@ -359,11 +351,10 @@ window.onload = function () {
         //resize barrier
         barrier.scale.set(0.2, 0.2, .2);
 
-        //rotate barrier
-        //barrier.rotateY(Math.PI / 2);
+        // Allow barrier object to cast shadow
+        barrier.castShadow = true;
 
         return barrier;
-
     }
 
     //----------------------------------------------------------------------------
