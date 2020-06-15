@@ -44,17 +44,8 @@ window.onload = function () {
         // scene.fog = new THREE.FogExp2(0xf0fff0, 0.14); //enable fog
         camera = new THREE.PerspectiveCamera(60, sceneWidth / sceneHeight, 0.1, 1000); //perspective camera
 
-        // Add background music to the camera 
-        var listener = new THREE.AudioListener();
-        camera.add(listener);
-        var sound = new THREE.Audio(listener);
-        var audioLoader = new THREE.AudioLoader();
-        audioLoader.load('sounds/06_-_Vivaldi_Summer_mvt_3_Presto_-_John_Harrison_violin.ogg', function (buffer) {
-            sound.setBuffer(buffer);
-            sound.setLoop(true);
-            sound.setVolume(0.5);
-            sound.play();
-        });
+
+
 
         //Renderer
         renderer = new THREE.WebGLRenderer({
@@ -92,6 +83,7 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
+        addMusic();
         addScore();
         //createHeart();
         //createHeartsPool();
@@ -121,6 +113,24 @@ window.onload = function () {
         sky.material.side = THREE.BackSide;
         scene.add(sky);
     }
+
+    //----------------------------------------------------------------------------
+    // Background Music 
+    //----------------------------------------------------------------------------
+    function addMusic() {
+        // Add background music to the camera 
+        var listener = new THREE.AudioListener();
+        camera.add(listener);
+        var sound = new THREE.Audio(listener);
+        var audioLoader = new THREE.AudioLoader();
+        audioLoader.load('sounds/06_-_Vivaldi_Summer_mvt_3_Presto_-_John_Harrison_violin.ogg', function (buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(true);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    }
+
 
 
     //----------------------------------------------------------------------------
