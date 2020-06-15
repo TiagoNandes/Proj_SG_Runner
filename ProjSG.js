@@ -44,6 +44,18 @@ window.onload = function () {
         // scene.fog = new THREE.FogExp2(0xf0fff0, 0.14); //enable fog
         camera = new THREE.PerspectiveCamera(60, sceneWidth / sceneHeight, 0.1, 1000); //perspective camera
 
+        // Add background music to the camera 
+        var listener = new THREE.AudioListener();
+        camera.add(listener);
+        var sound = new THREE.Audio(listener);
+        var audioLoader = new THREE.AudioLoader();
+        audioLoader.load('sounds/06_-_Vivaldi_Summer_mvt_3_Presto_-_John_Harrison_violin.ogg', function (buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(true);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+
         //Renderer
         renderer = new THREE.WebGLRenderer({
             alpha: true
@@ -151,9 +163,10 @@ window.onload = function () {
         scene.add(rollingGroundSphere);
         rollingGroundSphere.position.y = -24;
         rollingGroundSphere.position.z = 2;
-        addWorldHearts();
-        addWorldBarriers();
-        addWorldVirus();
+        addWorldObjects();
+        // addWorldHearts();
+        // addWorldBarriers();
+        // addWorldVirus();
     }
 
     //Heart animation
@@ -380,20 +393,22 @@ window.onload = function () {
     //     }
     // }
 
-
     //----------------------------------------------------------------------------
-    // Adds hearts to the scene based on the number of hearts and the gap between them
+    // Adds objects to the scene based on the number of objects and the gap between them
     //----------------------------------------------------------------------------
-    function addWorldHearts() {
-        var numHearts = 26; //36
-        var gap = 6.28 / 26; //6.28 / 36
+    function addWorldObjects() {
+        var numObjects = 60; //36
+        var gap = 6.28 / 60; //6.28 / 36
         // var gap=6.28/ 36;
-        for (var i = 0; i < numHearts; i++) {
+        for (var i = 0; i < numObjects; i++) {
             var rnd = Math.random();
-            if (rnd >= 0.5) {
-                addHeart(false, i * gap, true);
+            if (rnd <= 0.25) {
+                addObject(false, i * gap, true);
+            } else if (rnd > 0.25 && rnd <= 0.50) {
+                addObject(false, i * gap, false);
             } else {
-                addHeart(false, i * gap, false);
+                addObject(true, i * gap, true);
+                addObject(true, i * gap, false);
             }
 
         }
@@ -401,108 +416,104 @@ window.onload = function () {
 
 
     //----------------------------------------------------------------------------
-    // Sets the new heart's position on the scene 
+    // Sets the new object's position on the scene 
     //----------------------------------------------------------------------------
-    function addHeart(inPath, row, isLeft) {
-        var newHeart;
+    function addObject(pair, row, isLeft) {
+        var rnd = Math.random();
+        if (rnd <= 0.2) {
+            var newHeart;
+            newHeart = createHeart();
+            // Define Left and Right position of the heart object
+            //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
+            var objectPosition = 0;
+            if (pair) {
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
+                    1.6; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                }
+            } else {
 
-        newHeart = createHeart();
-        // Define Left and Right position of the heart object
-        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
-        var forestAreaAngle = 0;
-        if (isLeft) {
-            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                }
+            }
+            sphericalHelper.set(worldRadius + .5, objectPosition, row);
+
+            newHeart.position.setFromSpherical(sphericalHelper);
+            var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+            var heartVector = newHeart.position.clone().normalize();
+            newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
+            newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+
+            rollingGroundSphere.add(newHeart);
+
+        } else if (rnd > 0.20 && rnd <= 0.60) {
+            var newBarrier;
+            newBarrier = createBarrier();
+            // Define Left and Right position of the barrier object
+            //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
+            var objectPosition = 0;
+            if (pair) {
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
+                    1.6; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                }
+            } else {
+
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                }
+            }
+            sphericalHelper.set(worldRadius + .3, objectPosition, row);
+
+            newBarrier.position.setFromSpherical(sphericalHelper);
+            var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+            var barrierVector = newBarrier.position.clone().normalize();
+            newBarrier.quaternion.setFromUnitVectors(barrierVector, rollingGroundVector);
+            newBarrier.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+
+            rollingGroundSphere.add(newBarrier);
+
         } else {
-            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+            var newVirus;
+            newVirus = createVirus();
+            // Define Left and Right position of the virus object
+            //Values: Max left=1.72 || Middle=1.57 || Max right=1.4 
+            //Max Values when pair = true: left=1.6 || right=1.52
+            var objectPosition = 0;
+            if (pair) {
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
+                    1.6; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                }
+            } else {
+
+                if (isLeft) {
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                } else {
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                }
+            }
+            sphericalHelper.set(worldRadius + .5, objectPosition, row);
+
+            newVirus.position.setFromSpherical(sphericalHelper);
+            var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
+            var virusVector = newVirus.position.clone().normalize();
+            newVirus.quaternion.setFromUnitVectors(virusVector, rollingGroundVector);
+            newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+
+            rollingGroundSphere.add(newVirus);
         }
-        sphericalHelper.set(worldRadius + .5, forestAreaAngle, row);
-
-        newHeart.position.setFromSpherical(sphericalHelper);
-        var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
-        var heartVector = newHeart.position.clone().normalize();
-        newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
-        newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
-
-        rollingGroundSphere.add(newHeart);
-    }
-
-    //----------------------------------------------------------------------------
-    // Adds barriers to the scene based on the number of barriers and the gap between them
-    //----------------------------------------------------------------------------
-    function addWorldBarriers() {
-        var numBarriers = 36; //36
-        var gap = 9.28 / 36; //6.28 / 36
-        // var gap=6.28/ 36;
-        for (var i = 0; i < numBarriers; i++) {
-            addBarrier(false, i * gap, true);
-            //addBarrier(false, i * gap, false);
-        }
-    }
-
-    //----------------------------------------------------------------------------
-    // Sets the new barrier's position on the scene 
-    //----------------------------------------------------------------------------
-    function addBarrier(inPath, row, isLeft) {
-        var newBarrier;
-
-        newBarrier = createBarrier();
-        // Define Left and Right position of the barrier object
-        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
-        var forestAreaAngle = 0;
-        if (isLeft) {
-            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
-        } else {
-            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
-        }
-        sphericalHelper.set(worldRadius + .3, forestAreaAngle, row);
-
-        newBarrier.position.setFromSpherical(sphericalHelper);
-        var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
-        var barrierVector = newBarrier.position.clone().normalize();
-        newBarrier.quaternion.setFromUnitVectors(barrierVector, rollingGroundVector);
-        newBarrier.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
-
-        rollingGroundSphere.add(newBarrier);
-    }
-
-
-    //----------------------------------------------------------------------------
-    // Adds virus to the scene based on the number of virus and the gap between them
-    //----------------------------------------------------------------------------
-    function addWorldVirus() {
-        var numVirus = 36; //36
-        var gap = 5.28 / 36; //6.28 / 36
-        // var gap=6.28/ 36;
-        for (var i = 0; i < numVirus; i++) {
-            addVirus(false, i * gap, true);
-            //addVirus(false, i * gap, false);
-        }
-    }
-
-    //----------------------------------------------------------------------------
-    // Sets the new virus' position on the scene 
-    //----------------------------------------------------------------------------
-    function addVirus(inPath, row, isLeft) {
-        var newVirus;
-
-        newVirus = createVirus();
-        // Define Left and Right position of the virus object
-        //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
-        var forestAreaAngle = 0;
-        if (isLeft) {
-            forestAreaAngle = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
-        } else {
-            forestAreaAngle = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
-        }
-        sphericalHelper.set(worldRadius + .5, forestAreaAngle, row);
-
-        newVirus.position.setFromSpherical(sphericalHelper);
-        var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
-        var virusVector = newVirus.position.clone().normalize();
-        newVirus.quaternion.setFromUnitVectors(virusVector, rollingGroundVector);
-        newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
-
-        rollingGroundSphere.add(newVirus);
     }
 
     //----------------------------------------------------------------------------
