@@ -7,6 +7,12 @@ window.onload = function () {
     var heartReleaseInterval = 0.5;
     let scoreMesh;
     let clock, loader, mixer, animations, robot, text;
+
+    //Objects - Hearts & Obstacles
+    let newVirus, newBarrier, newHeart = [];
+
+    let clock, loader, mixer, animations;
+    let robot = new THREE.Object3D();
     let score = 0;
     // Array of obstacles
     let obstacles = [];
@@ -125,12 +131,23 @@ window.onload = function () {
         addWorld();
         addLight();
         addRobot();
+        addCube();
         addSkyBox();
         addScore();
         addHealth();
         // addMusic();
         //createHeart();
         //createHeartsPool();
+        // addMusic();
+        addScore();
+        if (robot !== undefined) {
+            detectCollision();
+        }
+
+        //createHeart();
+        //createHeartsPool();
+
+
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
@@ -485,6 +502,10 @@ window.onload = function () {
 
         // Allow barrier object to cast shadow
         barrier.castShadow = true;
+        obstacles.push({
+            object: barrier,
+            type: 1
+        })
 
         return barrier;
     }
@@ -540,7 +561,6 @@ window.onload = function () {
     function addObject(pair, row, isLeft) {
         var rnd = Math.random();
         if (rnd <= 0.2) {
-            var newHeart;
             newHeart = createHeart();
             // Define Left and Right position of the heart object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
@@ -574,7 +594,7 @@ window.onload = function () {
             rollingGroundSphere.add(newHeart);
 
         } else if (rnd > 0.20 && rnd <= 0.60) {
-            var newBarrier;
+
             newBarrier = createBarrier();
             // Define Left and Right position of the barrier object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
@@ -604,8 +624,9 @@ window.onload = function () {
 
             rollingGroundSphere.add(newBarrier);
 
+
         } else {
-            var newVirus;
+
             newVirus = createVirus();
             // Define Left and Right position of the virus object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4 
@@ -635,6 +656,14 @@ window.onload = function () {
             newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
             rollingGroundSphere.add(newVirus);
+
+            // console.log("OBSTACLES : " + obstacles);
+            // let key, count = 0;
+            // for (key in newVirus) {
+            //     if (newVirus.hasOwnProperty(key)) {
+            //         console.log(count++);
+            //     }
+            // }
         }
     }
 
@@ -693,6 +722,52 @@ window.onload = function () {
             // Translate to Center
             return numberMesh;
         };
+    //----------------------------------------------------------------------------
+    // Adds cube to handle robot collisions with obstacles
+    //----------------------------------------------------------------------------
+    function addCube() {
+        let cubeGeo = new THREE.BoxGeometry(0.7, 1, 1);
+        let cubeMat = new THREE.MeshBasicMaterial({
+            color: 0x00ff00
+        });
+        let cube = new THREE.Mesh(cubeGeo, cubeMat);
+        cube.position.y = 1.85;
+        cube.position.z = 9;
+        scene.add(cube);
+
+
+    }
+
+    function addScore() {
+        let loader = new THREE.FontLoader();
+        loader.load('fonts/font.json', data => {
+            font = data;
+            let text = 'Score: ' + score;
+            let geo = new THREE.TextGeometry(text, {
+                font: font,
+                size: 0.3,
+                height: 0.05
+            })
+
+            let material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+            let scoreMesh = new THREE.Mesh(geo, material);
+            scoreMesh.position.x = worldRadius - 26.8;
+            scoreMesh.position.y = 5;
+            scoreMesh.position.z = 1;
+            // scoreMesh.rotateY(Math.PI / 2)
+            scene.add(scoreMesh)
+
+
+        })
+    }
+
+    function updateScore() {
+        if (score <= 1000) {
+            score += 5;
+        }
+
     }
 
     //----------------------------------------------------------------------------
@@ -759,7 +834,6 @@ window.onload = function () {
         let keyCode = e.which;
         // Jump animation
         if (keyCode == 32) {
-
             state.name = 'Running'
             mixer = new THREE.AnimationMixer(robot);
             let clip = THREE.AnimationClip.findByName(animations, state.name);
@@ -781,12 +855,25 @@ window.onload = function () {
     //  Function to handle colisions 
     //----------------------------------------------------------------------------
     function detectCollision() {
-        // let originPoint = robot.position.clone();
-        // console.log(originPoint);
-        let robotBox = new THREE.Box3().setFromObject(robot);
+        console.log('ROBOT: ' + JSON.stringify(robot));
+        let obstBox = new THREE.Box3().setFromObject
+        let originPoint = robot.position.clone();
+
         for (let i = 0; i < obstacles.length; i++) {
-            // let obstBox = new THREE.Box3().setFromObject(obstacles[i]);
+
+            let robotBox = new THREE.Box3().setFromObject(robot)
+            console.log("ROBOTBOX: " + robotBox);
+            // obstacles.forEach(element => {
+            //     obstBox (element.object)
+            //     console.log("AQUI: " + obstBox);
+            // })
+            let obstBox = new THREE.Box3().setFromObject(obstacles[i].object);
+
+
             let collision = robotBox.intersectsBox(obstBox);
+            if (robotBox.intersectsBox(obstBox)) {
+                console.log("COLIDIU");
+            }
             return false;
         }
     }
@@ -858,8 +945,12 @@ window.onload = function () {
         requestAnimationFrame(update); //request next update
 
 
+
+        // updateScore()
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
+
+        // scoreState.update(deltaTime)
         render();
     }
 
