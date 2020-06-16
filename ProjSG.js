@@ -89,7 +89,7 @@ window.onload = function () {
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
-        // document.addEventListener('keyup', handleKeyRelease, false);
+        document.addEventListener('keyup', handleKeyRelease, false);
         window.addEventListener('resize', onWindowResize, false);
     }
 
@@ -597,11 +597,14 @@ window.onload = function () {
             let action = mixer.clipAction(clip);
             action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
             action.play();
-            robot.position.y = 2.5;
-
+            robot.position.y = 2.5
             setTimeout(function () {
-                robot.position.y = 2;
-            }, 500);
+                robot.position.y = 1;
+            }, 200)
+
+            // setTimeout(function () {
+            //     robot.position.y = 2;
+            // }, 500);
         }
         // Running animation - PRESS W TO START
         if (keyCode == 87) {
@@ -645,7 +648,7 @@ window.onload = function () {
         let keyCode = e.which;
         // Jump animation
         if (keyCode == 32) {
-            robot.position.y = 2;
+
             state.name = 'Running'
             mixer = new THREE.AnimationMixer(robot);
             let clip = THREE.AnimationClip.findByName(animations, state.name);
