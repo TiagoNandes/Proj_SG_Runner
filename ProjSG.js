@@ -835,6 +835,7 @@ window.onload = function () {
         // let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
 
         let collisionHelperBox = new THREE.Box3().setFromObject(collisionHelper);
+
         obstacles.forEach((element) => {
             let obstBox = new THREE.Box3().setFromObject(element);
             // console.log("OBSTBOX: " + JSON.stringify(obstBox));
@@ -939,7 +940,7 @@ window.onload = function () {
             score += 5;
         }
         count++;
-        detectCollision()
+        detectCollision();
     }
 
 
