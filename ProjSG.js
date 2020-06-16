@@ -7,7 +7,6 @@ window.onload = function () {
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
 
-    //****** FABIO VARIABLES */
     let clock, loader, mixer, animations, robot;
     let score = 0;
     // Array of obstacles
@@ -16,7 +15,6 @@ window.onload = function () {
     let state = {
         name: 'Idle'
     }
-    //****** FABIO VARIABLES */
 
 
     function init() {
