@@ -13,6 +13,7 @@ window.onload = function () {
     let clock, loader, mixer, animations;
     let robot = new THREE.Object3D();
     let score = 0;
+    let collisionHelper;
     // Array of obstacles
     let obstacles = [];
     // Initial state of the robot animation which is "Idle" by default
@@ -130,7 +131,7 @@ window.onload = function () {
         addWorld();
         addLight();
         addRobot();
-        addCube();
+        addCollisionHelper();
         addSkyBox();
         addScore();
         addHealth();
@@ -138,7 +139,7 @@ window.onload = function () {
         //createHeart();
         //createHeartsPool();
         // addMusic();
-        if (robot !== undefined) {
+        if (collisionHelper !== undefined) {
             detectCollision();
         }
 
@@ -498,10 +499,7 @@ window.onload = function () {
 
         // Allow barrier object to cast shadow
         barrier.castShadow = true;
-        obstacles.push({
-            object: barrier,
-            type: 1
-        })
+
 
         return barrier;
     }
@@ -618,6 +616,10 @@ window.onload = function () {
             newBarrier.quaternion.setFromUnitVectors(barrierVector, rollingGroundVector);
             newBarrier.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
+            //Add to obstacles array
+            obstacles.push(newBarrier)
+
+            //Add barriers to the moon
             rollingGroundSphere.add(newBarrier);
 
 
@@ -722,15 +724,15 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     // Adds cube to handle robot collisions with obstacles
     //----------------------------------------------------------------------------
-    function addCube() {
-        let cubeGeo = new THREE.BoxGeometry(0.7, 1, 1);
-        let cubeMat = new THREE.MeshBasicMaterial({
+    function addCollisionHelper() {
+        let chGeo = new THREE.BoxGeometry(0.7, 1, 1);
+        let chMat = new THREE.MeshBasicMaterial({
             color: 0x00ff00
         });
-        let cube = new THREE.Mesh(cubeGeo, cubeMat);
-        cube.position.y = 1.85;
-        cube.position.z = 9;
-        scene.add(cube);
+        collisionHelper = new THREE.Mesh(chGeo, chMat);
+        collisionHelper.position.y = 1.85;
+        collisionHelper.position.z = 9;
+        scene.add(collisionHelper);
 
 
     }
@@ -749,6 +751,7 @@ window.onload = function () {
             action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
             action.play();
             robot.position.y = 2.5
+            collisionHelper.position.y = 2.5
             setTimeout(function () {
                 robot.position.y = 1;
             }, 200)
@@ -778,6 +781,7 @@ window.onload = function () {
         if (keyCode == 65) {
             if (robot.position.x > -4) {
                 robot.position.x -= 0.15;
+                collisionHelper.position.x -= 0.15
                 robot.rotation.y = -2.8;
             }
 
@@ -786,6 +790,7 @@ window.onload = function () {
         if (keyCode == 68) {
             if (robot.position.x < 4) {
                 robot.position.x += 0.15;
+                collisionHelper.position.x += 0.15;
                 robot.rotation.y = 2.8;
             }
 
@@ -820,27 +825,43 @@ window.onload = function () {
     //  Function to handle colisions 
     //----------------------------------------------------------------------------
     function detectCollision() {
-        console.log('ROBOT: ' + JSON.stringify(robot));
-        let obstBox = new THREE.Box3().setFromObject
-        let originPoint = robot.position.clone();
 
-        for (let i = 0; i < obstacles.length; i++) {
+        // for (let i = 0; i <= obstacles.length; i++) {
 
-            let robotBox = new THREE.Box3().setFromObject(robot)
-            console.log("ROBOTBOX: " + robotBox);
-            // obstacles.forEach(element => {
-            //     obstBox (element.object)
-            //     console.log("AQUI: " + obstBox);
-            // })
-            let obstBox = new THREE.Box3().setFromObject(obstacles[i].object);
+        // let localVertex = collisionHelper.geometry.vertices[i - 1].clone();
+        // let globalVertex = localVertex.applyMatrix4(collisionHelper.matrix);
+        // let directionVector = globalVertex.sub(collisionHelper.position)
 
+        // let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
 
-            let collision = robotBox.intersectsBox(obstBox);
-            if (robotBox.intersectsBox(obstBox)) {
-                console.log("COLIDIU");
+        let collisionHelperBox = new THREE.Box3().setFromObject(collisionHelper);
+        obstacles.forEach((element) => {
+            let obstBox = new THREE.Box3().setFromObject(element);
+            // console.log("OBSTBOX: " + JSON.stringify(obstBox));
+            if (collisionHelperBox.intersectsBox(obstBox)) {
+                console.log("COLLISION!");
             }
-            return false;
-        }
+        })
+
+        // for (let j = 0; j <= obstacles.length; j++) {
+        //     let collisions = ray.intersectObjects(obstacles[j]);
+        //     if (collisions.length > 0 && collisions[0].distance < directionVector.length()) {
+        //         console.log("COLLISION!!!!!!!!!1");
+        //     }
+        // }
+
+
+        // let robotBox = new THREE.Box3().setFromObject(robot)
+        // console.log("ROBOTBOX: " + robotBox);
+
+
+
+        // let collision = robotBox.intersectsBox(obstBox);
+        // if (robotBox.intersectsBox(obstBox)) {
+        //     console.log("COLIDIU");
+        // }
+        // return false;
+        // }
     }
 
 
@@ -856,23 +877,19 @@ window.onload = function () {
         camera.updateProjectionMatrix();
     }
 
+    //----------------------------------------------------------------------------
+    //  Function to improve game difficulty
+    //----------------------------------------------------------------------------
     function updateRollingSpeed() {
         if (rollingSpeed > 1) {
             rollingSpeed += 0.01
         }
 
     }
-
-
-
-
-
-
-
-
-
+    //----------------------------------------------------------------------------
+    //  Function to update score
+    //----------------------------------------------------------------------------
     function updateScore() {
-
         var text = "Score: " + score;
         meshScore.geometry = new THREE.TextGeometry(text, {
             font: fontText,
@@ -882,9 +899,10 @@ window.onload = function () {
 
     }
 
-
+    //----------------------------------------------------------------------------
+    //  Function to update health
+    //----------------------------------------------------------------------------
     function updateHealth() {
-
         var text = "Health: " + 5;
         meshHealth.geometry = new THREE.TextGeometry(text, {
             font: fontText,
@@ -894,16 +912,9 @@ window.onload = function () {
 
     }
 
-
-
-
-
-
-
-
-
-
-
+    //----------------------------------------------------------------------------
+    //  Function to update game state
+    //----------------------------------------------------------------------------
     function update() {
         //Ground animation
         rollingGroundSphere.rotation.x += rollingSpeed;
@@ -916,18 +927,19 @@ window.onload = function () {
         render();
     }
 
+    //----------------------------------------------------------------------------
+    //  Render Function
+    //----------------------------------------------------------------------------
     function render() {
         // rotateHeart();
-
         renderer.render(scene, camera); //draw
-
 
         if (count % 100 == 0 || count == 0) {
             updateScore();
             score += 5;
         }
         count++;
-
+        detectCollision()
     }
 
 
