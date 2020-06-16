@@ -22,10 +22,10 @@ window.onload = function () {
     }
 
 
-    let lifes;
+    let health = 5;
     let meshScore;
     let fontText;
-    let meshLifes;
+    let meshHealth;
     let count = 0;
 
     // var fontLoader = new THREE.FontLoader();
@@ -217,7 +217,6 @@ window.onload = function () {
             //meshScore.rotateY(-Math.PI / 2)
             scene.add(meshScore)
 
-            // console.log("SCORE: " + meshScore);
 
         });
 
@@ -226,7 +225,6 @@ window.onload = function () {
 
 
     function addHealth() {
-
 
 
         var loader = new THREE.FontLoader();
@@ -241,12 +239,17 @@ window.onload = function () {
                 size: 0.3,
                 height: 0.05
             });
+            console.log("OLAAA")
+            var material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
             meshHealth = new THREE.Mesh(geometry, material)
-            meshHealth.position.x = -(plane.geometry.parameters.width / 2) + 50;
-            meshHealth.position.y = 20;
-            meshHealth.position.z = 200;
+            meshHealth.position.x = worldRadius - 20.8; //26.8
+            meshHealth.position.y = 5;
+            meshHealth.position.z = 1;
+
             //mesh.position.set(-1000,0,-50)
-            meshHealth.rotateY(-Math.PI / 2)
+            // meshHealth.rotateY(-Math.PI / 2)
             scene.add(meshHealth)
 
         });
@@ -693,34 +696,6 @@ window.onload = function () {
             })
     }
 
-
-
-    function updateScore() {
-        getTextMesh = (text, material) => {
-            //Number
-            var textgeometry = new TextBufferGeometry(
-                text,
-                Object.assign({}, {
-                    font: helvatiker,
-                    bevelEnabled: false,
-                    curveSegments: 8,
-                    bevelThickness: 1,
-                    bevelSize: 0,
-                    height: 0.7,
-                    size: 5
-                })
-            );
-            let numberMesh = new THREE.Mesh(textgeometry, material);
-            // wireframe
-            var geo = new THREE.EdgesGeometry(numberMesh.geometry); // or WireframeGeometry
-
-            var wireframe = new THREE.LineSegments(geo, wireFrameMaterial);
-            numberMesh.add(wireframe);
-
-            // Translate to Center
-            return numberMesh;
-        }
-    };
     //----------------------------------------------------------------------------
     // Adds cube to handle robot collisions with obstacles
     //----------------------------------------------------------------------------
@@ -840,6 +815,20 @@ window.onload = function () {
             // console.log("OBSTBOX: " + JSON.stringify(obstBox));
             if (collisionHelperBox.intersectsBox(obstBox)) {
                 console.log("COLLISION!");
+                health--;
+                updateHealth();
+
+
+
+
+                if (health == 0) {
+                    state.name = 'Death'
+                    mixer = new THREE.AnimationMixer(robot);
+                    let clip = THREE.AnimationClip.findByName(animations, state.name);
+                    let action = mixer.clipAction(clip);
+                    // action.setLoop(THREE.LoopOnce);
+                    action.play();
+                }
             }
         })
 
@@ -903,7 +892,8 @@ window.onload = function () {
     //  Function to update health
     //----------------------------------------------------------------------------
     function updateHealth() {
-        var text = "Health: " + 5;
+        var text = "Health: " + health;
+        console.log("HEALTH " + health)
         meshHealth.geometry = new THREE.TextGeometry(text, {
             font: fontText,
             size: 0.3,
@@ -923,6 +913,9 @@ window.onload = function () {
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
 
+
+
+
         // scoreState.update(deltaTime)
         render();
     }
@@ -938,8 +931,16 @@ window.onload = function () {
             updateScore();
             score += 5;
         }
+        if (count % 25 == 0 || count == 0) {
+            if (health > 0) {
+
+                detectCollision()
+            }
+
+        }
+
         count++;
-        detectCollision()
+
     }
 
 
