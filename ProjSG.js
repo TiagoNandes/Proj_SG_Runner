@@ -7,7 +7,11 @@ window.onload = function () {
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
 
-    let clock, loader, mixer, animations, robot;
+    //Objects - Hearts & Obstacles
+    let newVirus, newBarrier, newHeart = [];
+
+    let clock, loader, mixer, animations;
+    let robot = new THREE.Object3D();
     let score = 0;
     // Array of obstacles
     let obstacles = [];
@@ -81,11 +85,15 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
-        addMusic();
+        // addMusic();
         addScore();
+        if (robot !== undefined) {
+            detectCollision();
+        }
+
         //createHeart();
         //createHeartsPool();
-        setInterval(updateScore, 1000);
+
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
@@ -374,6 +382,10 @@ window.onload = function () {
 
         // Allow barrier object to cast shadow
         barrier.castShadow = true;
+        obstacles.push({
+            object: barrier,
+            type: 1
+        })
 
         return barrier;
     }
@@ -429,7 +441,6 @@ window.onload = function () {
     function addObject(pair, row, isLeft) {
         var rnd = Math.random();
         if (rnd <= 0.2) {
-            var newHeart;
             newHeart = createHeart();
             // Define Left and Right position of the heart object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
@@ -460,7 +471,7 @@ window.onload = function () {
             rollingGroundSphere.add(newHeart);
 
         } else if (rnd > 0.20 && rnd <= 0.60) {
-            var newBarrier;
+
             newBarrier = createBarrier();
             // Define Left and Right position of the barrier object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4
@@ -490,8 +501,9 @@ window.onload = function () {
 
             rollingGroundSphere.add(newBarrier);
 
+
         } else {
-            var newVirus;
+
             newVirus = createVirus();
             // Define Left and Right position of the virus object
             //Values: Max left=1.72 || Middle=1.57 || Max right=1.4 
@@ -521,6 +533,14 @@ window.onload = function () {
             newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
             rollingGroundSphere.add(newVirus);
+
+            // console.log("OBSTACLES : " + obstacles);
+            // let key, count = 0;
+            // for (key in newVirus) {
+            //     if (newVirus.hasOwnProperty(key)) {
+            //         console.log(count++);
+            //     }
+            // }
         }
     }
 
@@ -578,7 +598,7 @@ window.onload = function () {
     }
 
     function updateScore() {
-        if (score >= 1000) {
+        if (score <= 1000) {
             score += 5;
         }
 
@@ -648,7 +668,6 @@ window.onload = function () {
         let keyCode = e.which;
         // Jump animation
         if (keyCode == 32) {
-
             state.name = 'Running'
             mixer = new THREE.AnimationMixer(robot);
             let clip = THREE.AnimationClip.findByName(animations, state.name);
@@ -663,10 +682,16 @@ window.onload = function () {
     function detectCollision() {
         // let originPoint = robot.position.clone();
         // console.log(originPoint);
-        let robotBox = new THREE.Box3().setFromObject(robot);
         for (let i = 0; i < obstacles.length; i++) {
-            // let obstBox = new THREE.Box3().setFromObject(obstacles[i]);
-            let collision = robotBox.intersectsBox(obstBox);
+
+            let robotBox = new THREE.Box3().setFromObject(robot)
+            let obstBox = new THREE.Box3().setFromObject(obstacles[i].object);
+            console.log("AQUI: " + JSON.stringify(obstacles[i].object));
+
+            // let collision = robotBox.intersectsBox(obstBox);
+            if (robotBox.intersectsBox(obstBox)) {
+                console.log("COLIDIU");
+            }
             return false;
         }
     }
@@ -697,8 +722,12 @@ window.onload = function () {
         requestAnimationFrame(update); //request next update
 
 
+
+        // updateScore()
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
+
+        // scoreState.update(deltaTime)
         render();
     }
 
