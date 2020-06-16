@@ -84,6 +84,7 @@ window.onload = function () {
         addWorld();
         addLight();
         addRobot();
+        addCube();
         addSkyBox();
         // addMusic();
         addScore();
@@ -572,6 +573,22 @@ window.onload = function () {
             })
     }
 
+    //----------------------------------------------------------------------------
+    // Adds cube to handle robot collisions with obstacles
+    //----------------------------------------------------------------------------
+    function addCube() {
+        let cubeGeo = new THREE.BoxGeometry(0.7, 1, 1);
+        let cubeMat = new THREE.MeshBasicMaterial({
+            color: 0x00ff00
+        });
+        let cube = new THREE.Mesh(cubeGeo, cubeMat);
+        cube.position.y = 1.85;
+        cube.position.z = 9;
+        scene.add(cube);
+
+
+    }
+
     function addScore() {
         let loader = new THREE.FontLoader();
         loader.load('fonts/font.json', data => {
@@ -680,15 +697,22 @@ window.onload = function () {
     //  Function to handle colisions 
     //----------------------------------------------------------------------------
     function detectCollision() {
-        // let originPoint = robot.position.clone();
-        // console.log(originPoint);
+        console.log('ROBOT: ' + JSON.stringify(robot));
+        let obstBox = new THREE.Box3().setFromObject
+        let originPoint = robot.position.clone();
+
         for (let i = 0; i < obstacles.length; i++) {
 
             let robotBox = new THREE.Box3().setFromObject(robot)
+            console.log("ROBOTBOX: " + robotBox);
+            // obstacles.forEach(element => {
+            //     obstBox (element.object)
+            //     console.log("AQUI: " + obstBox);
+            // })
             let obstBox = new THREE.Box3().setFromObject(obstacles[i].object);
-            console.log("AQUI: " + JSON.stringify(obstacles[i].object));
 
-            // let collision = robotBox.intersectsBox(obstBox);
+
+            let collision = robotBox.intersectsBox(obstBox);
             if (robotBox.intersectsBox(obstBox)) {
                 console.log("COLIDIU");
             }
