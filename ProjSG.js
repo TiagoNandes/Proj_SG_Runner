@@ -1,13 +1,12 @@
 window.onload = function () {
     var sceneWidth, sceneHeight, rollingGroundSphere, dom, sun, camera, scene, renderer, sphericalHelper;
-    var heartsInPath, heartsPool, hasCollided, up;
     var orbitControl;
     var rollingSpeed = 0.003;
     var worldRadius = 26;
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
-
-    let clock, loader, mixer, animations, robot;
+    let scoreMesh;
+    let clock, loader, mixer, animations, robot, text;
     let score = 0;
     // Array of obstacles
     let obstacles = [];
@@ -17,8 +16,54 @@ window.onload = function () {
     }
 
 
-    function init() {
+    let lifes;
+    let meshScore;
+    let fontText;
+    let meshLifes;
+    let count = 0;
 
+    // var fontLoader = new THREE.FontLoader();
+
+    // fontLoader.load('fonts/font.json', function (font) {
+
+    //     var text2D = new THREE.TextGeometry(newText.textContent, {
+    //         size: 200,
+    //         height: 2,
+    //         curveSegments: 3,
+    //         font: font
+    //     });
+    //     var color = new THREE.Color(newText.color);
+    //     var textMaterial = new THREE.MeshBasicMaterial({
+    //         color: color
+    //     });
+    //     var text = new THREE.Mesh(text2D, textMaterial);
+    //     text.name = "2D Text 1";
+
+    //     //Add the text to current scene
+    //     current_scene.add(text);
+
+    //     //set the elemnt as active element
+    //     activeElement = current_scene.getObjectByName(text.name);
+    //     console.log('activeElement:', activeElement);
+
+    // });
+
+    // function textData(changedValue) {
+    //     activeElement.geometry.parameters.text = changedValue;
+    // }
+    // //Group to hold mesh
+    // group = new THREE.Group();
+    // scene.add(group);
+
+    // //add clock mesh
+    // startTime = new Date();
+    // earthClockMesh = this.getTextMesh(startTime.toLocaleString(), textMaterial);
+    // group.add(earthClockMesh);
+
+
+
+
+    function init() {
         // set up the scene
         createScene();
         //call game loop
@@ -81,15 +126,14 @@ window.onload = function () {
         addLight();
         addRobot();
         addSkyBox();
-        addMusic();
         addScore();
+        addHealth();
+        // addMusic();
         //createHeart();
         //createHeartsPool();
-        setInterval(updateScore, 1000);
-
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
-        document.addEventListener('keyup', handleKeyRelease, false);
+        document.addEventListener('keyup', handleKeyUp, false);
         window.addEventListener('resize', onWindowResize, false);
     }
 
@@ -128,6 +172,73 @@ window.onload = function () {
             sound.play();
         });
     }
+
+
+    function addScore() {
+
+
+
+        var loader = new THREE.FontLoader();
+        //var 
+        loader.load('./fonts/font.json', data => {
+            //var font = new THREE.FontLoader().parse(data);
+            fontText = data;
+
+            ////mesh scores
+            var text = 'Score: ' + score;
+            var geometry = new THREE.TextGeometry(text, {
+                font: fontText,
+                size: 0.3,
+                height: 0.05
+            });
+
+            var material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+            meshScore = new THREE.Mesh(geometry, material)
+            meshScore.position.x = worldRadius - 26.8;
+            meshScore.position.y = 5;
+            meshScore.position.z = 1;
+            //mesh.position.set(-1000,0,-50)
+            //meshScore.rotateY(-Math.PI / 2)
+            scene.add(meshScore)
+
+            // console.log("SCORE: " + meshScore);
+
+        });
+
+    }
+
+
+
+    function addHealth() {
+
+
+
+        var loader = new THREE.FontLoader();
+        //var 
+        loader.load('./fonts/font.json', data => {
+            //var font = new THREE.FontLoader().parse(data);
+            fontText = data;
+
+            var text = 'Health: ' + health;
+            geometry = new THREE.TextGeometry(text, {
+                font: fontText,
+                size: 0.3,
+                height: 0.05
+            });
+            meshHealth = new THREE.Mesh(geometry, material)
+            meshHealth.position.x = -(plane.geometry.parameters.width / 2) + 50;
+            meshHealth.position.y = 20;
+            meshHealth.position.z = 200;
+            //mesh.position.set(-1000,0,-50)
+            meshHealth.rotateY(-Math.PI / 2)
+            scene.add(meshHealth)
+
+        });
+
+    }
+
 
 
 
@@ -439,14 +550,14 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
                     1.6; //1.68 + Math.random() * 0.3
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52;
                 }
             } else {
 
                 if (isLeft) {
-                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57;
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
             sphericalHelper.set(worldRadius + .5, objectPosition, row);
@@ -456,6 +567,9 @@ window.onload = function () {
             var heartVector = newHeart.position.clone().normalize();
             newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
             newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+            // var axesHelper = new THREE.AxesHelper(20);
+            // newHeart.add(axesHelper);
+            // newHeart.rotation.x += Math.PI;
 
             rollingGroundSphere.add(newHeart);
 
@@ -470,14 +584,14 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
                     1.6; //1.68 + Math.random() * 0.3
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52;
                 }
             } else {
 
                 if (isLeft) {
-                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57;
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
             sphericalHelper.set(worldRadius + .3, objectPosition, row);
@@ -502,14 +616,14 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.72 - 1.6) + 1.6;
                     1.6; //1.68 + Math.random() * 0.3
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.52) + 1.52;
                 }
             } else {
 
                 if (isLeft) {
-                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57; //1.68 + Math.random() * 0.3
+                    objectPosition = Math.random() * (1.72 - 1.57) + 1.57;
                 } else {
-                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56; //1.46 - Math.random() * 0.1
+                    objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
             sphericalHelper.set(worldRadius + .5, objectPosition, row);
@@ -552,36 +666,33 @@ window.onload = function () {
             })
     }
 
-    function addScore() {
-        let loader = new THREE.FontLoader();
-        loader.load('fonts/font.json', data => {
-            font = data;
-            let text = 'Score: ' + score;
-            let geo = new THREE.TextGeometry(text, {
-                font: font,
-                size: 0.3,
-                height: 0.05
-            })
-
-            let material = new THREE.MeshBasicMaterial({
-                color: 0xffffff
-            })
-            let scoreMesh = new THREE.Mesh(geo, material);
-            scoreMesh.position.x = worldRadius - 26.8;
-            scoreMesh.position.y = 5;
-            scoreMesh.position.z = 1;
-            // scoreMesh.rotateY(Math.PI / 2)
-            scene.add(scoreMesh)
-
-
-        })
-    }
+  
 
     function updateScore() {
-        if (score >= 1000) {
-            score += 5;
-        }
+        getTextMesh = (text, material) => {
+            //Number
+            var textgeometry = new TextBufferGeometry(
+                text,
+                Object.assign({}, {
+                    font: helvatiker,
+                    bevelEnabled: false,
+                    curveSegments: 8,
+                    bevelThickness: 1,
+                    bevelSize: 0,
+                    height: 0.7,
+                    size: 5
+                })
+            );
+            let numberMesh = new THREE.Mesh(textgeometry, material);
+            // wireframe
+            var geo = new THREE.EdgesGeometry(numberMesh.geometry); // or WireframeGeometry
 
+            var wireframe = new THREE.LineSegments(geo, wireFrameMaterial);
+            numberMesh.add(wireframe);
+
+            // Translate to Center
+            return numberMesh;
+        };
     }
 
     //----------------------------------------------------------------------------
@@ -644,7 +755,7 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     //  Function to handle released keys 
     //----------------------------------------------------------------------------
-    function handleKeyRelease(e) {
+    function handleKeyUp(e) {
         let keyCode = e.which;
         // Jump animation
         if (keyCode == 32) {
@@ -654,6 +765,15 @@ window.onload = function () {
             let clip = THREE.AnimationClip.findByName(animations, state.name);
             let action = mixer.clipAction(clip);
             action.play();
+        }
+        // Return to normal rotation
+        if (keyCode == 65) {
+            robot.rotation.y = Math.PI;
+        }
+        // Return to normal rotation
+        if (keyCode == 68) {
+            robot.rotation.y = Math.PI;
+
         }
     }
 
@@ -691,6 +811,47 @@ window.onload = function () {
 
     }
 
+
+
+
+
+
+
+
+
+    function updateScore() {
+
+        var text = "Score: " + score;
+        meshScore.geometry = new THREE.TextGeometry(text, {
+            font: fontText,
+            size: 0.3,
+            height: 0.05
+        });
+
+    }
+
+
+    function updateHealth() {
+       
+        var text = "Health: " + 5;
+        meshHealth.geometry = new THREE.TextGeometry(text, {
+            font: fontText,
+            size: 0.3,
+            height: 0.05
+        });
+
+    }
+
+
+
+
+
+
+
+
+
+
+
     function update() {
         //Ground animation
         rollingGroundSphere.rotation.x += rollingSpeed;
@@ -704,7 +865,16 @@ window.onload = function () {
 
     function render() {
         // rotateHeart();
+
         renderer.render(scene, camera); //draw
+
+
+        if (count % 100 == 0 || count == 0) {
+            updateScore();
+            score += 5;
+        }
+        count++;
+
     }
 
 
