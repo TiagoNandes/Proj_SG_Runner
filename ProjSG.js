@@ -5,8 +5,7 @@ window.onload = function () {
     var worldRadius = 26;
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
-    let scoreMesh;
-    let clock, loader, mixer, animations, robot, text;
+    let scoreMesh, text;
 
     //Objects - Hearts & Obstacles
     let newVirus, newBarrier, newHeart = [];
@@ -139,7 +138,6 @@ window.onload = function () {
         //createHeart();
         //createHeartsPool();
         // addMusic();
-        addScore();
         if (robot !== undefined) {
             detectCollision();
         }
@@ -192,8 +190,6 @@ window.onload = function () {
 
 
     function addScore() {
-
-
 
         var loader = new THREE.FontLoader();
         //var 
@@ -695,7 +691,7 @@ window.onload = function () {
             })
     }
 
-  
+
 
     function updateScore() {
         getTextMesh = (text, material) => {
@@ -721,7 +717,8 @@ window.onload = function () {
 
             // Translate to Center
             return numberMesh;
-        };
+        }
+    };
     //----------------------------------------------------------------------------
     // Adds cube to handle robot collisions with obstacles
     //----------------------------------------------------------------------------
@@ -735,38 +732,6 @@ window.onload = function () {
         cube.position.z = 9;
         scene.add(cube);
 
-
-    }
-
-    function addScore() {
-        let loader = new THREE.FontLoader();
-        loader.load('fonts/font.json', data => {
-            font = data;
-            let text = 'Score: ' + score;
-            let geo = new THREE.TextGeometry(text, {
-                font: font,
-                size: 0.3,
-                height: 0.05
-            })
-
-            let material = new THREE.MeshBasicMaterial({
-                color: 0xffffff
-            })
-            let scoreMesh = new THREE.Mesh(geo, material);
-            scoreMesh.position.x = worldRadius - 26.8;
-            scoreMesh.position.y = 5;
-            scoreMesh.position.z = 1;
-            // scoreMesh.rotateY(Math.PI / 2)
-            scene.add(scoreMesh)
-
-
-        })
-    }
-
-    function updateScore() {
-        if (score <= 1000) {
-            score += 5;
-        }
 
     }
 
@@ -919,7 +884,7 @@ window.onload = function () {
 
 
     function updateHealth() {
-       
+
         var text = "Health: " + 5;
         meshHealth.geometry = new THREE.TextGeometry(text, {
             font: fontText,
@@ -944,9 +909,6 @@ window.onload = function () {
         rollingGroundSphere.rotation.x += rollingSpeed;
         requestAnimationFrame(update); //request next update
 
-
-
-        // updateScore()
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
 
