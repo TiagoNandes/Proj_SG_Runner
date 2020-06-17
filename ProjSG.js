@@ -959,7 +959,7 @@ window.onload = function () {
 
         }
         if (gameOver) {
-            console.log("ACABOU!!")
+            console.log("ACABOU!!!")
             addGameOver();
         }
 
