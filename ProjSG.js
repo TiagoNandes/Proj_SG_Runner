@@ -14,8 +14,11 @@ window.onload = function () {
     let robot = new THREE.Object3D();
     let score = 0;
     let collisionHelper;
-    // Array of obstacles
-    let obstacles = [];
+    // Arrays of obstacles
+    let obstacles_barriers = [];
+    let obstacles_virus = [];
+    // Array of boostables
+    let boostables_hearts = [];
     // Initial state of the robot animation which is "Idle" by default
     let state = {
         name: 'Idle'
@@ -146,7 +149,6 @@ window.onload = function () {
         //createHeart();
         //createHeartsPool();
 
-
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
@@ -189,9 +191,10 @@ window.onload = function () {
         });
     }
 
-
+    //----------------------------------------------------------------------------
+    // Player Score
+    //----------------------------------------------------------------------------
     function addScore() {
-
         var loader = new THREE.FontLoader();
         //var 
         loader.load('./fonts/font.json', data => {
@@ -216,17 +219,14 @@ window.onload = function () {
             //mesh.position.set(-1000,0,-50)
             //meshScore.rotateY(-Math.PI / 2)
             scene.add(meshScore)
-
-
         });
 
     }
 
-
-
+    //----------------------------------------------------------------------------
+    // Player Health
+    //----------------------------------------------------------------------------
     function addHealth() {
-
-
         var loader = new THREE.FontLoader();
         //var 
         loader.load('./fonts/font.json', data => {
@@ -251,13 +251,8 @@ window.onload = function () {
             //mesh.position.set(-1000,0,-50)
             // meshHealth.rotateY(-Math.PI / 2)
             scene.add(meshHealth)
-
         });
-
     }
-
-
-
 
     //----------------------------------------------------------------------------
     // Lights and shadows
@@ -484,7 +479,6 @@ window.onload = function () {
     // Create Barrier
     //----------------------------------------------------------------------------
     function createBarrier() {
-
         var barrierGeometry = new THREE.BoxGeometry(2, 4, 10);
         // Create a texture phong material for the sphere, with map and bumpMap textures
         barrierMap = new THREE.TextureLoader().load('textures/barrier.jpg');
@@ -494,7 +488,6 @@ window.onload = function () {
             bumpMap: barrierBumpMap,
             bumpScale: 0.1
         });
-
         var barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
 
         //resize barrier
@@ -502,7 +495,6 @@ window.onload = function () {
 
         // Allow barrier object to cast shadow
         barrier.castShadow = true;
-
 
         return barrier;
     }
@@ -551,7 +543,6 @@ window.onload = function () {
         }
     }
 
-
     //----------------------------------------------------------------------------
     // Sets the new object's position on the scene 
     //----------------------------------------------------------------------------
@@ -588,6 +579,9 @@ window.onload = function () {
             // newHeart.add(axesHelper);
             // newHeart.rotation.x += Math.PI;
 
+            //Add to boostables_hearts array
+            boostables_hearts.push(newHeart);
+            // Add Hearts to the moon
             rollingGroundSphere.add(newHeart);
 
         } else if (rnd > 0.20 && rnd <= 0.60) {
@@ -619,8 +613,8 @@ window.onload = function () {
             newBarrier.quaternion.setFromUnitVectors(barrierVector, rollingGroundVector);
             newBarrier.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
-            //Add to obstacles array
-            obstacles.push(newBarrier)
+            //Add to obstacles_barriers array
+            obstacles_barriers.push(newBarrier)
 
             //Add barriers to the moon
             rollingGroundSphere.add(newBarrier);
@@ -656,9 +650,13 @@ window.onload = function () {
             newVirus.quaternion.setFromUnitVectors(virusVector, rollingGroundVector);
             newVirus.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
 
+            //Add to obstacles_barriers array
+            obstacles_virus.push(newVirus)
+
+            //Add virus to the moon
             rollingGroundSphere.add(newVirus);
 
-            // console.log("OBSTACLES : " + obstacles);
+            // console.log("obstacles_barriers : " + obstacles_barriers);
             // let key, count = 0;
             // for (key in newVirus) {
             //     if (newVirus.hasOwnProperty(key)) {
@@ -697,7 +695,7 @@ window.onload = function () {
     }
 
     //----------------------------------------------------------------------------
-    // Adds cube to handle robot collisions with obstacles
+    // Adds cube to handle robot collisions with obstacles_barriers
     //----------------------------------------------------------------------------
     function addCollisionHelper() {
         let chGeo = new THREE.BoxGeometry(0.7, 1, 1);
@@ -708,8 +706,6 @@ window.onload = function () {
         collisionHelper.position.y = 1.85;
         collisionHelper.position.z = 9;
         scene.add(collisionHelper);
-
-
     }
 
     //----------------------------------------------------------------------------
@@ -730,10 +726,6 @@ window.onload = function () {
             setTimeout(function () {
                 robot.position.y = 1;
             }, 200)
-
-            // setTimeout(function () {
-            //     robot.position.y = 2;
-            // }, 500);
         }
         // Running animation - PRESS W TO START
         if (keyCode == 87) {
@@ -800,28 +792,14 @@ window.onload = function () {
     //  Function to handle colisions 
     //----------------------------------------------------------------------------
     function detectCollision() {
-
-        // for (let i = 0; i <= obstacles.length; i++) {
-
-        // let localVertex = collisionHelper.geometry.vertices[i - 1].clone();
-        // let globalVertex = localVertex.applyMatrix4(collisionHelper.matrix);
-        // let directionVector = globalVertex.sub(collisionHelper.position)
-
-        // let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-
         let collisionHelperBox = new THREE.Box3().setFromObject(collisionHelper);
 
-        obstacles.forEach((element) => {
+        obstacles_barriers.forEach((element) => {
             let obstBox = new THREE.Box3().setFromObject(element);
-            // console.log("OBSTBOX: " + JSON.stringify(obstBox));
             if (collisionHelperBox.intersectsBox(obstBox)) {
-                console.log("COLLISION!");
+                console.log("COLLISION WITH BARRIER!");
                 health--;
                 updateHealth();
-
-
-
-
                 if (health == 0) {
                     state.name = 'Death'
                     mixer = new THREE.AnimationMixer(robot);
@@ -829,6 +807,34 @@ window.onload = function () {
                     let action = mixer.clipAction(clip);
                     // action.setLoop(THREE.LoopOnce);
                     action.play();
+                }
+            }
+        })
+
+        obstacles_virus.forEach((element) => {
+            let obstBox = new THREE.Box3().setFromObject(element);
+            if (collisionHelperBox.intersectsBox(obstBox)) {
+                console.log("COLLISION WITH VIRUS!");
+                health--;
+                updateHealth();
+                if (health == 0) {
+                    state.name = 'Death'
+                    mixer = new THREE.AnimationMixer(robot);
+                    let clip = THREE.AnimationClip.findByName(animations, state.name);
+                    let action = mixer.clipAction(clip);
+                    // action.setLoop(THREE.LoopOnce);
+                    action.play();
+                }
+            }
+        })
+
+        boostables_hearts.forEach((element) => {
+            let boostBox = new THREE.Box3().setFromObject(element);
+            if (collisionHelperBox.intersectsBox(boostBox)) {
+                console.log("BOOST HEALTH BY 1!");
+                if (health >= 1 && health < 5) {
+                    health++;
+                    updateHealth();
                 }
             }
         })
@@ -914,11 +920,12 @@ window.onload = function () {
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
 
-
-
-
+        if (health > 0 && health <= 5) {
+            render();
+        } else {
+            console.log("GAME OVER");
+        }
         // scoreState.update(deltaTime)
-        render();
     }
 
     //----------------------------------------------------------------------------
@@ -927,7 +934,6 @@ window.onload = function () {
     function render() {
         // rotateHeart();
         renderer.render(scene, camera); //draw
-
         if (count % 100 == 0 || count == 0) {
             updateScore();
             score += 5;
@@ -942,7 +948,5 @@ window.onload = function () {
 
         count++;
     }
-
-
     init();
 }
