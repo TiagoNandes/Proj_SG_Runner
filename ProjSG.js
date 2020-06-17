@@ -702,7 +702,10 @@ window.onload = function () {
         let chMat = new THREE.MeshBasicMaterial({
             color: 0x00ff00
         });
+        chMat.transparent=true;
+        chMat.opacity=0;
         collisionHelper = new THREE.Mesh(chGeo, chMat);
+        
         collisionHelper.position.y = 1.85;
         collisionHelper.position.z = 9;
         scene.add(collisionHelper);
