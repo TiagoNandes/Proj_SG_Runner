@@ -26,11 +26,15 @@ window.onload = function () {
     }
 
 
+
+
     let health = 5;
     let meshScore;
     let fontText;
     let meshHealth;
     let frames = 0;
+
+    
 
     // var fontLoader = new THREE.FontLoader();
 
@@ -709,6 +713,7 @@ window.onload = function () {
                 // Set positions 
                 robot.position.y = 1.05;
                 robot.position.z = 9;
+                robot.receiveShadow = true;
                 robot.scale.set(0.3, 0.3, 0.3);
 
                 // Rotation
