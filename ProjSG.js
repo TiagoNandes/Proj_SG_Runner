@@ -789,7 +789,7 @@ window.onload = function () {
     }
 
     //----------------------------------------------------------------------------
-    //  Function to handle colisions 
+    //  Function to handle colisions  
     //----------------------------------------------------------------------------
     function detectCollision() {
         let collisionHelperBox = new THREE.Box3().setFromObject(collisionHelper);
