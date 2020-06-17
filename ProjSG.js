@@ -6,6 +6,7 @@ window.onload = function () {
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
     let scoreMesh, text;
+    let gameOver = false;
 
     //Objects - Hearts & Obstacles
     let newVirus, newBarrier, newHeart = [];
@@ -29,7 +30,7 @@ window.onload = function () {
     let meshScore;
     let fontText;
     let meshHealth;
-    let count = 0;
+    let frames = 0;
 
     // var fontLoader = new THREE.FontLoader();
 
@@ -254,6 +255,34 @@ window.onload = function () {
         });
     }
 
+    function addGameOver() {
+        var loader = new THREE.FontLoader();
+        //var 
+        loader.load('./fonts/font.json', data => {
+            //var font = new THREE.FontLoader().parse(data);
+            fontText = data;
+
+            var text = 'GAME OVER!';
+            geometry = new THREE.TextGeometry(text, {
+                font: fontText,
+                size: 1,
+                height: 0.25
+            });
+
+            var material = new THREE.MeshBasicMaterial({
+                color: 0xffffff
+            })
+            meshGameOver = new THREE.Mesh(geometry, material)
+            meshGameOver.position.x = worldRadius - 26.8; //26.8
+            meshGameOver.position.y = 2.9;
+            meshGameOver.position.z = 8.4;
+
+            //mesh.position.set(-1000,0,-50)
+            // meshHealth.rotateY(-Math.PI / 2)
+            scene.add(meshGameOver)
+        });
+    }
+
     //----------------------------------------------------------------------------
     // Lights and shadows
     //----------------------------------------------------------------------------
@@ -261,7 +290,7 @@ window.onload = function () {
         var hemisphereLight = new THREE.HemisphereLight(0xfffafa, 0x000000, .9)
         scene.add(hemisphereLight);
         sun = new THREE.DirectionalLight(0xcdc1c5, 0.9);
-        sun.position.set(12, 6, -7);
+        sun.position.set(21.3, 7.5, 4.3);
         sun.castShadow = true;
         scene.add(sun);
         //Set up shadow properties for the sun light
@@ -657,10 +686,10 @@ window.onload = function () {
             rollingGroundSphere.add(newVirus);
 
             // console.log("obstacles_barriers : " + obstacles_barriers);
-            // let key, count = 0;
+            // let key, frames = 0;
             // for (key in newVirus) {
             //     if (newVirus.hasOwnProperty(key)) {
-            //         console.log(count++);
+            //         console.log(frames++);
             //     }
             // }
         }
@@ -702,10 +731,10 @@ window.onload = function () {
         let chMat = new THREE.MeshBasicMaterial({
             color: 0x00ff00
         });
-        chMat.transparent=true;
-        chMat.opacity=0;
+        chMat.transparent = true;
+        chMat.opacity = 0;
         collisionHelper = new THREE.Mesh(chGeo, chMat);
-        
+
         collisionHelper.position.y = 1.85;
         collisionHelper.position.z = 9;
         scene.add(collisionHelper);
@@ -925,9 +954,16 @@ window.onload = function () {
 
         if (health > 0 && health <= 5) {
             render();
-        } else {
-            console.log("GAME OVER");
+        } else if (health == 0) {
+            gameOver = true;
+
         }
+        if (gameOver) {
+            console.log("ACABOU")
+            addGameOver();
+        }
+
+
         // scoreState.update(deltaTime)
     }
 
@@ -937,11 +973,11 @@ window.onload = function () {
     function render() {
         // rotateHeart();
         renderer.render(scene, camera); //draw
-        if (count % 100 == 0 || count == 0) {
+        if (frames % 100 == 0 || frames == 0) {
             updateScore();
             score += 5;
         }
-        if (count % 25 == 0 || count == 0) {
+        if (frames % 25 == 0 || frames == 0) {
             if (health > 0) {
 
                 detectCollision()
@@ -949,7 +985,8 @@ window.onload = function () {
 
         }
 
-        count++;
+        console.log("Camera pos: " + JSON.stringify(camera.position))
+        frames++;
     }
     init();
 }
