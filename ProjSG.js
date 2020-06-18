@@ -26,7 +26,7 @@ window.onload = function () {
     }
 
 
-//comentário para apagar 
+    //comentário para apagar 
 
     let health = 5;
     let meshScore;
@@ -34,7 +34,7 @@ window.onload = function () {
     let meshHealth;
     let frames = 0;
 
-    
+
 
     // var fontLoader = new THREE.FontLoader();
 
@@ -291,17 +291,23 @@ window.onload = function () {
     // Lights and shadows
     //----------------------------------------------------------------------------
     function addLight() {
-        var hemisphereLight = new THREE.HemisphereLight(0xfffafa, 0x000000, .9)
+        var hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, .8)
         scene.add(hemisphereLight);
-        sun = new THREE.DirectionalLight(0xcdc1c5, 0.9);
-        sun.position.set(21.3, 7.5, 4.3);
+        sun = new THREE.DirectionalLight(0xffffff, .8);
+        sun.position.set(26.8, 29.5, 20.5);
         sun.castShadow = true;
         scene.add(sun);
         //Set up shadow properties for the sun light
-        sun.shadow.mapSize.width = 256;
-        sun.shadow.mapSize.height = 256;
+        sun.shadow.mapSize.width = 1000;
+        sun.shadow.mapSize.height = 1000;
         sun.shadow.camera.near = 0.5;
-        sun.shadow.camera.far = 50;
+        sun.shadow.camera.far = 500;
+        sun.target.position.set( 0, -1.5, 6 );
+        scene.add( sun.target );
+        //helper to see the sun's shadows
+        var helper = new THREE.CameraHelper(sun.shadow.camera);
+        scene.add(helper);
+
     }
 
     //----------------------------------------------------------------------------
@@ -707,13 +713,19 @@ window.onload = function () {
         loader.load('models/GLTF/RobotExpressive.glb',
             function (gltf) {
                 // Import robot and his animations and add them to the scene
+
+                //adds shadow to the robot
+                gltf.scene.traverse(function (robot) {
+                    if (robot instanceof THREE.Mesh) {
+                        robot.castShadow = true;
+                    }
+                });
                 robot = gltf.scene;
                 animations = gltf.animations;
                 scene.add(robot);
                 // Set positions 
                 robot.position.y = 1.05;
                 robot.position.z = 9;
-                robot.receiveShadow = true;
                 robot.scale.set(0.3, 0.3, 0.3);
 
                 // Rotation
