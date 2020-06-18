@@ -6,7 +6,6 @@ window.onload = function () {
     //var heartRotationSpeed = 1;
     var heartReleaseInterval = 0.5;
     let scoreMesh, text;
-    let gameOver = false;
 
     //Objects - Hearts & Obstacles
     let newVirus, newBarrier, newHeart = [];
@@ -26,15 +25,11 @@ window.onload = function () {
     }
 
 
-//comentário para apagar 
-
     let health = 5;
     let meshScore;
     let fontText;
     let meshHealth;
     let frames = 0;
-
-    
 
     // var fontLoader = new THREE.FontLoader();
 
@@ -129,10 +124,9 @@ window.onload = function () {
         //----------------------------------------------------------------------------
         // Enables mouse and zoom controlls on the scene 
         //----------------------------------------------------------------------------
-        orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
-        orbitControl.addEventListener('change', render);
-        // Disable zoom functionality
-        orbitControl.enableZoom = true;
+        // orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
+        // orbitControl.addEventListener('change', render);
+        // orbitControl.enableZoom = true;
 
         // Call Functions to add the components of the game
         // createHeartsPool();
@@ -262,24 +256,24 @@ window.onload = function () {
     function addGameOver() {
         var loader = new THREE.FontLoader();
         //var 
-        loader.load('./fonts/font.json', data => {
+        loader.load('./fonts/gameover_font.json', data => {
             //var font = new THREE.FontLoader().parse(data);
             fontText = data;
 
-            var text = 'GAME OVER!';
+            var text = 'G A M E  O V E R  !! \n Your score: ' + score;
             geometry = new THREE.TextGeometry(text, {
                 font: fontText,
-                size: 1,
-                height: 0.25
+                size: 0.9,
+                height: 0.1,
             });
 
             var material = new THREE.MeshBasicMaterial({
-                color: 0xffffff
+                color: 0xff0000
             })
             meshGameOver = new THREE.Mesh(geometry, material)
-            meshGameOver.position.x = worldRadius - 26.8; //26.8
-            meshGameOver.position.y = 2.9;
-            meshGameOver.position.z = 8.4;
+            meshGameOver.position.x = worldRadius - 29.5; //26.8
+            meshGameOver.position.y = 5;
+            meshGameOver.position.z = 5.4;
 
             //mesh.position.set(-1000,0,-50)
             // meshHealth.rotateY(-Math.PI / 2)
@@ -713,7 +707,6 @@ window.onload = function () {
                 // Set positions 
                 robot.position.y = 1.05;
                 robot.position.z = 9;
-                robot.receiveShadow = true;
                 robot.scale.set(0.3, 0.3, 0.3);
 
                 // Rotation
@@ -929,6 +922,7 @@ window.onload = function () {
             size: 0.3,
             height: 0.05
         });
+        score += 5;
 
     }
 
@@ -957,19 +951,9 @@ window.onload = function () {
         let deltaTime = clock.getDelta();
         mixer.update(deltaTime)
 
-        if (health > 0 && health <= 5) {
+        if (health >= 0 && health <= 5) {
             render();
-        } else if (health == 0) {
-            gameOver = true;
-
         }
-        if (gameOver) {
-            console.log("ACABOU!!!")
-            addGameOver();
-        }
-
-
-        // scoreState.update(deltaTime)
     }
 
     //----------------------------------------------------------------------------
@@ -978,19 +962,27 @@ window.onload = function () {
     function render() {
         // rotateHeart();
         renderer.render(scene, camera); //draw
-        if (frames % 100 == 0 || frames == 0) {
-            updateScore();
-            score += 5;
-        }
-        if (frames % 25 == 0 || frames == 0) {
-            if (health > 0) {
-
-                detectCollision()
+        if (health >= 1) {
+            if (frames % 100 == 0 || frames == 0) {
+                updateScore();
             }
+            if (frames % 25 == 0 || frames == 0) {
+                if (health > 0) {
+                    detectCollision()
+                }
 
+            }
+        } else {
+            // console.log("VERIFICAR GAMEOVER: " + gameOver);
+            //Remove Score and Health from the scene
+            scene.remove(meshScore);
+            scene.remove(meshHealth);
+            addGameOver();
         }
 
-        console.log("Camera pos: " + JSON.stringify(camera.position))
+
+
+        // console.log("Camera pos: " + JSON.stringify(camera.position))
         frames++;
     }
     init();
