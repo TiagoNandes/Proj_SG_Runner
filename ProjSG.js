@@ -3,9 +3,6 @@ window.onload = function () {
     var orbitControl;
     var rollingSpeed = 0.003;
     var worldRadius = 26;
-    //var heartRotationSpeed = 1;
-    var heartReleaseInterval = 0.5;
-    let scoreMesh, text;
 
     //Objects - Hearts & Obstacles
     let newVirus, newBarrier, newHeart = [];
@@ -19,9 +16,9 @@ window.onload = function () {
     let obstacles_virus = [];
     // Array of boostables
     let boostables_hearts = [];
-    // Initial state of the robot animation which is "Idle" by default
+    // Initial state of the robot animation
     let state = {
-        name: 'Idle'
+        name: 'Running'
     }
 
 
@@ -30,46 +27,6 @@ window.onload = function () {
     let fontText;
     let meshHealth;
     let frames = 0;
-
-    // var fontLoader = new THREE.FontLoader();
-
-    // fontLoader.load('fonts/font.json', function (font) {
-
-    //     var text2D = new THREE.TextGeometry(newText.textContent, {
-    //         size: 200,
-    //         height: 2,
-    //         curveSegments: 3,
-    //         font: font
-    //     });
-    //     var color = new THREE.Color(newText.color);
-    //     var textMaterial = new THREE.MeshBasicMaterial({
-    //         color: color
-    //     });
-    //     var text = new THREE.Mesh(text2D, textMaterial);
-    //     text.name = "2D Text 1";
-
-    //     //Add the text to current scene
-    //     current_scene.add(text);
-
-    //     //set the elemnt as active element
-    //     activeElement = current_scene.getObjectByName(text.name);
-    //     console.log('activeElement:', activeElement);
-
-    // });
-
-    // function textData(changedValue) {
-    //     activeElement.geometry.parameters.text = changedValue;
-    // }
-    // //Group to hold mesh
-    // group = new THREE.Group();
-    // scene.add(group);
-
-    // //add clock mesh
-    // startTime = new Date();
-    // earthClockMesh = this.getTextMesh(startTime.toLocaleString(), textMaterial);
-    // group.add(earthClockMesh);
-
-
 
 
     function init() {
@@ -93,11 +50,7 @@ window.onload = function () {
         scene = new THREE.Scene();
         sceneWidth = window.innerWidth;
         sceneHeight = window.innerHeight;
-        // scene.fog = new THREE.FogExp2(0xf0fff0, 0.14); //enable fog
-        camera = new THREE.PerspectiveCamera(60, sceneWidth / sceneHeight, 0.1, 1000); //perspective camera
-
-
-
+        camera = new THREE.PerspectiveCamera(60, sceneWidth / sceneHeight, 0.1, 1000);
 
         //Renderer
         renderer = new THREE.WebGLRenderer({
@@ -113,23 +66,17 @@ window.onload = function () {
         //----------------------------------------------------------------------------
         // Camera position
         //----------------------------------------------------------------------------
-        camera.position.z = 12.85;
-        camera.position.y = 2.55;
-
-        //Helping grid
-        // var gridXZ = new THREE.GridHelper(100, 10);
-        // scene.add(gridXZ);
-
+        camera.position.z = 25; //12.85
+        camera.position.y = 2.55; //2.55
 
         //----------------------------------------------------------------------------
         // Enables mouse and zoom controlls on the scene 
         //----------------------------------------------------------------------------
-        // orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
-        // orbitControl.addEventListener('change', render);
-        // orbitControl.enableZoom = true;
+        orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
+        orbitControl.addEventListener('change', render);
+        orbitControl.enableZoom = true;
 
         // Call Functions to add the components of the game
-        // createHeartsPool();
         addWorld();
         addLight();
         addRobot();
@@ -137,16 +84,11 @@ window.onload = function () {
         addSkyBox();
         addScore();
         addHealth();
-        // addMusic();
-        //createHeart();
-        //createHeartsPool();
-        // addMusic();
+        addMusic();
+
         if (collisionHelper !== undefined) {
             detectCollision();
         }
-
-        //createHeart();
-        //createHeartsPool();
 
         //Handle keydown and resize events
         document.addEventListener('keydown', handleKeyDown, false);
@@ -197,10 +139,9 @@ window.onload = function () {
         var loader = new THREE.FontLoader();
         //var 
         loader.load('./fonts/font.json', data => {
-            //var font = new THREE.FontLoader().parse(data);
             fontText = data;
 
-            ////mesh scores
+            // score mesh
             var text = 'Score: ' + score;
             var geometry = new THREE.TextGeometry(text, {
                 font: fontText,
@@ -212,11 +153,12 @@ window.onload = function () {
                 color: 0xffffff
             })
             meshScore = new THREE.Mesh(geometry, material)
-            meshScore.position.x = worldRadius - 26.8;
-            meshScore.position.y = 5;
-            meshScore.position.z = 1;
-            //mesh.position.set(-1000,0,-50)
-            //meshScore.rotateY(-Math.PI / 2)
+            meshScore.position.x = worldRadius - 29.7;
+            meshScore.position.y = 3;
+            meshScore.position.z = 9;
+            meshScore.rotation.y = 0.5;
+            meshScore.rotation.x = 0.5;
+
             scene.add(meshScore)
         });
 
@@ -243,12 +185,12 @@ window.onload = function () {
                 color: 0xffffff
             })
             meshHealth = new THREE.Mesh(geometry, material)
-            meshHealth.position.x = worldRadius - 20.8; //26.8
-            meshHealth.position.y = 5;
-            meshHealth.position.z = 1;
+            meshHealth.position.x = worldRadius - 23.8; //26.8
+            meshHealth.position.y = 3.5;
+            meshHealth.position.z = 8;
+            meshHealth.rotation.y = -0.5;
+            meshHealth.rotation.x = 0.5;
 
-            //mesh.position.set(-1000,0,-50)
-            // meshHealth.rotateY(-Math.PI / 2)
             scene.add(meshHealth)
         });
     }
@@ -272,11 +214,9 @@ window.onload = function () {
             })
             meshGameOver = new THREE.Mesh(geometry, material)
             meshGameOver.position.x = worldRadius - 29.5; //26.8
-            meshGameOver.position.y = 5;
+            meshGameOver.position.y = 4.5;
             meshGameOver.position.z = 5.4;
 
-            //mesh.position.set(-1000,0,-50)
-            // meshHealth.rotateY(-Math.PI / 2)
             scene.add(meshGameOver)
         });
     }
@@ -296,11 +236,11 @@ window.onload = function () {
         sun.shadow.mapSize.height = 1000;
         sun.shadow.camera.near = 0.5;
         sun.shadow.camera.far = 500;
-        sun.target.position.set( 0, -1.5, 6 );
-        scene.add( sun.target );
+        sun.target.position.set(0, -1.5, 6);
+        scene.add(sun.target);
         //helper to see the sun's shadows
-        var helper = new THREE.CameraHelper(sun.shadow.camera);
-        scene.add(helper);
+        // var helper = new THREE.CameraHelper(sun.shadow.camera);
+        // scene.add(helper);
 
     }
 
@@ -328,33 +268,7 @@ window.onload = function () {
         rollingGroundSphere.position.y = -24;
         rollingGroundSphere.position.z = 2;
         addWorldObjects();
-        // addWorldHearts();
-        // addWorldBarriers();
-        // addWorldVirus();
     }
-
-    //Heart animation
-    // function rotateHeart() {
-    //     heart.rotation.z -= heartRotationSpeed;
-    //     if (up) {
-    //         heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), 0.02)
-    //         if (Math.floor(heart.position.z) == -1) {
-    //             up = false
-
-    //         }
-    //     } else if (!up) {
-    //         heart.translateOnAxis(new THREE.Vector3(0, 0, 1).normalize(), -0.02)
-    //         if (Math.floor(heart.position.z) == 1) {
-    //             up = true
-
-    //         }
-    //     } else {
-    //         heart.position.set(0, 0, 0)
-
-    //     }
-
-
-    // }
 
 
     //----------------------------------------------------------------------------
@@ -689,13 +603,7 @@ window.onload = function () {
             //Add virus to the moon
             rollingGroundSphere.add(newVirus);
 
-            // console.log("obstacles_barriers : " + obstacles_barriers);
-            // let key, frames = 0;
-            // for (key in newVirus) {
-            //     if (newVirus.hasOwnProperty(key)) {
-            //         console.log(frames++);
-            //     }
-            // }
+
         }
     }
 
@@ -769,23 +677,6 @@ window.onload = function () {
             setTimeout(function () {
                 robot.position.y = 1;
             }, 200)
-        }
-        // Running animation - PRESS W TO START
-        if (keyCode == 87) {
-            state.name = 'Running'
-            mixer = new THREE.AnimationMixer(robot);
-            let clip = THREE.AnimationClip.findByName(animations, state.name);
-            let action = mixer.clipAction(clip);
-            action.play();
-        }
-        // Death animation - PRESS M
-        if (keyCode == 77) {
-            state.name = 'Death'
-            mixer = new THREE.AnimationMixer(robot);
-            let clip = THREE.AnimationClip.findByName(animations, state.name);
-            let action = mixer.clipAction(clip);
-            action.setLoop(THREE.LoopOnce)
-            action.play();
         }
         // Robot move left - PRESS A 
         if (keyCode == 65) {
@@ -881,26 +772,6 @@ window.onload = function () {
                 }
             }
         })
-
-        // for (let j = 0; j <= obstacles.length; j++) {
-        //     let collisions = ray.intersectObjects(obstacles[j]);
-        //     if (collisions.length > 0 && collisions[0].distance < directionVector.length()) {
-        //         console.log("COLLISION!!!!!!!!!1");
-        //     }
-        // }
-
-
-        // let robotBox = new THREE.Box3().setFromObject(robot)
-        // console.log("ROBOTBOX: " + robotBox);
-
-
-
-        // let collision = robotBox.intersectsBox(obstBox);
-        // if (robotBox.intersectsBox(obstBox)) {
-        //     console.log("COLIDIU");
-        // }
-        // return false;
-        // }
     }
 
 
@@ -986,16 +857,16 @@ window.onload = function () {
 
             }
         } else {
-            // console.log("VERIFICAR GAMEOVER: " + gameOver);
             //Remove Score and Health from the scene
             scene.remove(meshScore);
             scene.remove(meshHealth);
             addGameOver();
         }
+        //inicial camera animation
+        if (camera.position.z > 12.85) {
+            camera.position.z -= 0.3;
+        }
 
-
-
-        // console.log("Camera pos: " + JSON.stringify(camera.position))
         frames++;
     }
     init();
