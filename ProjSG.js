@@ -26,7 +26,7 @@ window.onload = function () {
     }
 
 
-
+//comentário para apagar 
 
     let health = 5;
     let meshScore;
