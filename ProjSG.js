@@ -505,9 +505,9 @@ window.onload = function () {
     // Adds objects to the scene based on the number of objects and the gap between them
     //----------------------------------------------------------------------------
     function addWorldObjects() {
-        var numObjects = 60; //36
-        var gap = 6.28 / 60; //6.28 / 36
-        // var gap=6.28/ 36;
+        //Number of rendered objects
+        var numObjects = 60; 
+        var gap = 6.28 / 60; 
         for (var i = 0; i < numObjects; i++) {
             var rnd = Math.random();
             if (rnd <= 0.25) {
