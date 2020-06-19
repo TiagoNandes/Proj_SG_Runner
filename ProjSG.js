@@ -75,7 +75,7 @@ window.onload = function () {
         // Enables mouse and zoom controlls on the scene 
         //----------------------------------------------------------------------------
         orbitControl = new THREE.OrbitControls(camera, renderer.domElement);
-        orbitControl.addEventListener('change', render);
+        orbitControl.addEventListener('change', renderer.render);
         orbitControl.enableZoom = true;
 
         // Call Functions to add the components of the game
@@ -899,16 +899,9 @@ window.onload = function () {
         mixer.update(deltaTime)
 
         if (health >= 0 && health <= 5) {
-            render();
+            renderer.render(scene, camera);
         }
-    }
 
-    //----------------------------------------------------------------------------
-    //  Render Function
-    //----------------------------------------------------------------------------
-    function render() {
-        // rotateHeart();
-        renderer.render(scene, camera); //draw
         if (health >= 1) {
             if (frames % 100 == 0 || frames == 0) {
                 updateScore();
@@ -960,5 +953,5 @@ window.onload = function () {
 
         frames++;
     }
-    init();
+    init()
 }
