@@ -3,10 +3,12 @@ window.onload = function () {
     var orbitControl;
     var rollingSpeed = 0.003;
     var worldRadius = 26;
+    var isGameOver = false;
 
     //Objects - Hearts & Obstacles
     let newVirus, newBarrier, newHeart = [];
-
+    let robotMoveLeft = false;
+    let robotMoveRight = false;
     let clock, loader, mixer, animations;
     let robot = new THREE.Object3D();
     let score = 0;
@@ -133,6 +135,22 @@ window.onload = function () {
     }
 
     //----------------------------------------------------------------------------
+    // Game Over Sound 
+    //----------------------------------------------------------------------------
+    function addGameOverSound() {
+        var listener = new THREE.AudioListener();
+        camera.add(listener);
+        var sound = new THREE.Audio(listener);
+        var audioLoader = new THREE.AudioLoader();
+        audioLoader.load('sounds/game_over_sound.mp3', function (buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    }
+
+    //----------------------------------------------------------------------------
     // Player Score
     //----------------------------------------------------------------------------
     function addScore() {
@@ -197,28 +215,42 @@ window.onload = function () {
 
     function addGameOver() {
         var loader = new THREE.FontLoader();
-        //var 
-        loader.load('./fonts/gameover_font.json', data => {
-            //var font = new THREE.FontLoader().parse(data);
-            fontText = data;
+        if (isGameOver === false) {
+            addGameOverSound();
+            isGameOver = true;
+            //increase rotation of the moon to make game harder
+            rollingSpeed = 0;
+            //var 
+            loader.load('./fonts/gameover_font.json', data => {
+                //var font = new THREE.FontLoader().parse(data);
+                fontText = data;
 
-            var text = 'G A M E  O V E R  !! \n Your score: ' + score;
-            geometry = new THREE.TextGeometry(text, {
-                font: fontText,
-                size: 0.9,
-                height: 0.1,
+                var text = 'G A M E  O V E R  !! \n Your score: ' + score;
+                geometry = new THREE.TextGeometry(text, {
+                    font: fontText,
+                    size: 0.9,
+                    height: 0.1,
+                });
+
+                var material = new THREE.MeshBasicMaterial({
+                    color: 0xff0000
+                })
+                meshGameOver = new THREE.Mesh(geometry, material)
+                meshGameOver.position.x = worldRadius - 29.5; //26.8
+                meshGameOver.position.y = 4.5;
+                meshGameOver.position.z = 5.4;
+
+                scene.add(meshGameOver)
+
+
             });
 
-            var material = new THREE.MeshBasicMaterial({
-                color: 0xff0000
-            })
-            meshGameOver = new THREE.Mesh(geometry, material)
-            meshGameOver.position.x = worldRadius - 29.5; //26.8
-            meshGameOver.position.y = 4.5;
-            meshGameOver.position.z = 5.4;
+        }
 
-            scene.add(meshGameOver)
-        });
+
+
+
+
     }
 
     //----------------------------------------------------------------------------
@@ -662,65 +694,104 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     //  Function to handle pressed keys by the user 
     //----------------------------------------------------------------------------
+
+
     function handleKeyDown(e) {
-        let keyCode = e.which
-        // Jump animation
-        if (keyCode == 32) {
-            state.name = 'Jump'
-            mixer = new THREE.AnimationMixer(robot);
-            let clip = THREE.AnimationClip.findByName(animations, state.name);
-            let action = mixer.clipAction(clip);
-            action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
-            action.play();
-            robot.position.y = 2.5
-            collisionHelper.position.y = 2.5
-            setTimeout(function () {
-                robot.position.y = 1;
-            }, 200)
-        }
-        // Robot move left - PRESS A 
-        if (keyCode == 65) {
-            if (robot.position.x > -4) {
-                robot.position.x -= 0.15;
-                collisionHelper.position.x -= 0.15
-                robot.rotation.y = -2.8;
-            }
 
-        }
-        // Robot move right - PRESS D
+        let keyCode = e.which;
+
         if (keyCode == 68) {
-            if (robot.position.x < 4) {
-                robot.position.x += 0.15;
-                collisionHelper.position.x += 0.15;
-                robot.rotation.y = 2.8;
-            }
+            robotMoveRight = true
+        }
 
+        if (keyCode == 65) {
+            robotMoveLeft = true
         }
     }
+
+
+
+
+
+
+    // function handleKeyDown(e) {
+    //     let keyCode = e.which
+    //     // Jump animation
+    //     if (keyCode == 32) {
+    //         state.name = 'Jump'
+    //         mixer = new THREE.AnimationMixer(robot);
+    //         let clip = THREE.AnimationClip.findByName(animations, state.name);
+    //         let action = mixer.clipAction(clip);
+    //         action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
+    //         action.play();
+    //         robot.position.y = 2.5
+    //         collisionHelper.position.y = 2.5
+    //         setTimeout(function () {
+    //             robot.position.y = 1;
+    //         }, 200)
+    //     }
+    //     // Robot move left - PRESS A 
+    //     if (keyCode == 65) {
+    //         if (robot.position.x > -4) {
+    //             robot.position.x -= 0.15;
+    //             collisionHelper.position.x -= 0.15
+    //             robot.rotation.y = -2.8;
+    //         }
+
+    //     }
+    //     // Robot move right - PRESS D
+    //     if (keyCode == 68) {
+    //         if (robot.position.x < 4) {
+    //             robot.position.x += 0.15;
+    //             collisionHelper.position.x += 0.15;
+    //             robot.rotation.y = 2.8;
+    //         }
+
+    //     }
+    // }
 
     //----------------------------------------------------------------------------
     //  Function to handle released keys 
     //----------------------------------------------------------------------------
-    function handleKeyUp(e) {
-        let keyCode = e.which;
-        // Jump animation
-        if (keyCode == 32) {
-            state.name = 'Running'
-            mixer = new THREE.AnimationMixer(robot);
-            let clip = THREE.AnimationClip.findByName(animations, state.name);
-            let action = mixer.clipAction(clip);
-            action.play();
-        }
-        // Return to normal rotation
-        if (keyCode == 65) {
-            robot.rotation.y = Math.PI;
-        }
-        // Return to normal rotation
-        if (keyCode == 68) {
-            robot.rotation.y = Math.PI;
 
+    function handleKeyUp(e) {
+
+        let keyCode = e.which;
+
+        if (keyCode == 68) {
+            robotMoveRight = false
+            robot.rotation.y = Math.PI;
         }
+
+        if (keyCode == 65) {
+            robotMoveLeft = false
+            robot.rotation.y = Math.PI;
+        }
+
     }
+
+
+
+    // function handleKeyUp(e) {
+    //     let keyCode = e.which;
+    //     // Jump animation
+    //     if (keyCode == 32) {
+    //         state.name = 'Running'
+    //         mixer = new THREE.AnimationMixer(robot);
+    //         let clip = THREE.AnimationClip.findByName(animations, state.name);
+    //         let action = mixer.clipAction(clip);
+    //         action.play();
+    //     }
+    //     // Return to normal rotation
+    //     if (keyCode == 65) {
+    //         robot.rotation.y = Math.PI;
+    //     }
+    //     // Return to normal rotation
+    //     if (keyCode == 68) {
+    //         robot.rotation.y = Math.PI;
+
+    //     }
+    // }
 
     //----------------------------------------------------------------------------
     //  Function to handle colisions  
@@ -765,7 +836,7 @@ window.onload = function () {
         boostables_hearts.forEach((element) => {
             let boostBox = new THREE.Box3().setFromObject(element);
             if (collisionHelperBox.intersectsBox(boostBox)) {
-                console.log("BOOST HEALTH BY 1!");
+                console.log("BOOST HEALTH BY 1!" + element);
                 if (health >= 1 && health < 5) {
                     health++;
                     updateHealth();
@@ -787,15 +858,7 @@ window.onload = function () {
         camera.updateProjectionMatrix();
     }
 
-    //----------------------------------------------------------------------------
-    //  Function to improve game difficulty
-    //----------------------------------------------------------------------------
-    function updateRollingSpeed() {
-        if (rollingSpeed > 1) {
-            rollingSpeed += 0.01
-        }
 
-    }
     //----------------------------------------------------------------------------
     //  Function to update score
     //----------------------------------------------------------------------------
@@ -862,10 +925,38 @@ window.onload = function () {
             scene.remove(meshHealth);
             addGameOver();
         }
+
         //inicial camera animation
         if (camera.position.z > 12.85) {
             camera.position.z -= 0.3;
         }
+
+        //increase rotation of the moon to make game harder
+        if (isGameOver === false) {
+            rollingSpeed += 0.000001;
+        }
+
+        //Robot movement logic
+        if (robotMoveRight) {
+
+            if (robot.position.x < 4) {
+                robot.position.x += 0.1;
+                collisionHelper.position.x += 0.1;
+                robot.rotation.y = 2.4;
+            }
+
+        }
+
+        if (robotMoveLeft) {
+
+            if (robot.position.x > -4) {
+                robot.position.x -= 0.1;
+                collisionHelper.position.x -= 0.1
+                robot.rotation.y = -2.4;
+            }
+
+        }
+
 
         frames++;
     }
