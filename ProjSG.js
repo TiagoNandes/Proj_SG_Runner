@@ -506,8 +506,8 @@ window.onload = function () {
     //----------------------------------------------------------------------------
     function addWorldObjects() {
         //Number of rendered objects
-        var numObjects = 60; 
-        var gap = 6.28 / 60; 
+        var numObjects = 60;
+        var gap = 6.28 / 60;
         for (var i = 0; i < numObjects; i++) {
             var rnd = Math.random();
             if (rnd <= 0.25) {
@@ -547,16 +547,16 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
-            sphericalHelper.set(worldRadius + .5, objectPosition, row);
+            sphericalHelper.set(worldRadius + .7, objectPosition, row);
 
             newHeart.position.setFromSpherical(sphericalHelper);
             var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
             var heartVector = newHeart.position.clone().normalize();
             newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
             newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
-            // var axesHelper = new THREE.AxesHelper(20);
-            // newHeart.add(axesHelper);
-            // newHeart.rotation.x += Math.PI;
+            var axesHelper = new THREE.AxesHelper(20);
+            newHeart.add(axesHelper);
+            newHeart.rotation.z += Math.PI;
 
             //Add to boostables_hearts array
             boostables_hearts.push(newHeart);
@@ -584,7 +584,7 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
-            sphericalHelper.set(worldRadius + .3, objectPosition, row);
+            sphericalHelper.set(worldRadius + .25, objectPosition, row);
 
             newBarrier.position.setFromSpherical(sphericalHelper);
             var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -621,7 +621,7 @@ window.onload = function () {
                     objectPosition = Math.random() * (1.42 - 1.56) + 1.56;
                 }
             }
-            sphericalHelper.set(worldRadius + .5, objectPosition, row);
+            sphericalHelper.set(worldRadius + .7, objectPosition, row);
 
             newVirus.position.setFromSpherical(sphericalHelper);
             var rollingGroundVector = rollingGroundSphere.position.clone().normalize();
@@ -700,10 +700,27 @@ window.onload = function () {
 
         let keyCode = e.which;
 
+        // Jump animation
+        if (keyCode == 32) {
+            state.name = 'Jump'
+            mixer = new THREE.AnimationMixer(robot);
+            let clip = THREE.AnimationClip.findByName(animations, state.name);
+            let action = mixer.clipAction(clip);
+            action.setLoop(THREE.LoopOnce) // Make the "jump" animation play only one time per key press
+            action.play();
+            robot.position.y = 2.5
+            collisionHelper.position.y = 2.5
+            setTimeout(function () {
+                robot.position.y = 1;
+            }, 200)
+        }
+
+        // Robot move right - PRESS D
         if (keyCode == 68) {
             robotMoveRight = true
         }
 
+        // Robot move left - PRESS A 
         if (keyCode == 65) {
             robotMoveLeft = true
         }
@@ -758,13 +775,24 @@ window.onload = function () {
 
         let keyCode = e.which;
 
+        // Jump animation
+        if (keyCode == 32) {
+            state.name = 'Running'
+            mixer = new THREE.AnimationMixer(robot);
+            let clip = THREE.AnimationClip.findByName(animations, state.name);
+            let action = mixer.clipAction(clip);
+            action.play();
+        }
+
+        // Return to normal rotation
         if (keyCode == 68) {
-            robotMoveRight = false
+            robotMoveRight = false;
             robot.rotation.y = Math.PI;
         }
 
+        // Return to normal rotations
         if (keyCode == 65) {
-            robotMoveLeft = false
+            robotMoveLeft = false;
             robot.rotation.y = Math.PI;
         }
 
@@ -906,12 +934,32 @@ window.onload = function () {
             if (frames % 100 == 0 || frames == 0) {
                 updateScore();
             }
-            if (frames % 25 == 0 || frames == 0) {
-                if (health > 0) {
-                    detectCollision()
-                }
 
+            if (rollingSpeed <= 0.005) {
+                if (frames % 25 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
+            } else if (rollingSpeed <= 0.010) {
+                if (frames % 17 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
+            } else if (rollingSpeed <= 0.015) {
+                if (frames % 10 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
             }
+
+
+
         } else {
             //Remove Score and Health from the scene
             scene.remove(meshScore);
@@ -927,28 +975,30 @@ window.onload = function () {
         //increase rotation of the moon to make game harder
         if (isGameOver === false) {
             rollingSpeed += 0.000001;
-        }
 
-        //Robot movement logic
-        if (robotMoveRight) {
+            //Robot movement logic
+            if (robotMoveRight) {
 
-            if (robot.position.x < 4) {
-                robot.position.x += 0.1;
-                collisionHelper.position.x += 0.1;
-                robot.rotation.y = 2.4;
+                if (robot.position.x < 4) {
+                    robot.position.x += 0.1;
+                    collisionHelper.position.x += 0.1;
+                    robot.rotation.y = 2.4;
+                }
+
             }
 
-        }
+            if (robotMoveLeft) {
 
-        if (robotMoveLeft) {
+                if (robot.position.x > -4) {
+                    robot.position.x -= 0.1;
+                    collisionHelper.position.x -= 0.1
+                    robot.rotation.y = -2.4;
+                }
 
-            if (robot.position.x > -4) {
-                robot.position.x -= 0.1;
-                collisionHelper.position.x -= 0.1
-                robot.rotation.y = -2.4;
             }
-
         }
+
+
 
 
         frames++;
