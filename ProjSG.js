@@ -647,6 +647,7 @@ window.onload = function () {
         scene.add(collisionHelper);
     }
 
+
     //----------------------------------------------------------------------------
     //  Function to handle pressed keys by the user 
     //----------------------------------------------------------------------------
@@ -893,7 +894,7 @@ window.onload = function () {
 
                 if (robot.position.x > -4) {
                     robot.position.x -= 0.1;
-                    collisionHelper.position.x -= 0.1
+                    collisionHelper.position.x -= 0.1;
                     robot.rotation.y = -2.4;
                 }
             }
