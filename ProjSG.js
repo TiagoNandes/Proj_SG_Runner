@@ -192,7 +192,6 @@ window.onload = function () {
                 size: 0.3,
                 height: 0.05
             });
-            console.log("OLAAA")
             var material = new THREE.MeshBasicMaterial({
                 color: 0xffffff
             })
@@ -663,9 +662,8 @@ window.onload = function () {
             robot.position.y = 2.5
             collisionHelper.position.y = 2.5
             setTimeout(function () {
-                action.crossFadeTo(state.name = 'Idle')
                 robot.position.y = 1;
-            }, 1000)
+            }, 200)
         }
 
         // Robot move right - PRESS D
@@ -828,7 +826,7 @@ window.onload = function () {
                         detectCollision()
                     }
                 }
-            // Detects collision once in 21 frames
+                // Detects collision once in 21 frames
             } else if (rollingSpeed <= 0.006) {
                 if (frames % 21 == 0 || frames == 0) {
                     if (health > 0) {
@@ -836,14 +834,14 @@ window.onload = function () {
                     }
 
                 }
-            // Detects collision once in 17 frames    
+                // Detects collision once in 17 frames    
             } else if (rollingSpeed <= 0.008) {
                 if (frames % 17 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
                 }
-            // Detects collision once in 13 frames    
+                // Detects collision once in 13 frames    
             } else if (rollingSpeed <= 0.010) {
                 if (frames % 13 == 0 || frames == 0) {
                     if (health > 0) {
@@ -851,7 +849,7 @@ window.onload = function () {
                     }
 
                 }
-            // Detects collision once in 9 frames    
+                // Detects collision once in 9 frames    
             } else if (rollingSpeed <= 0.012) {
                 if (frames % 9 == 0 || frames == 0) {
                     if (health > 0) {
@@ -859,7 +857,7 @@ window.onload = function () {
                     }
 
                 }
-            // Detects collision once in 6 frames
+                // Detects collision once in 6 frames
             } else if (rollingSpeed <= 0.014) {
                 if (frames % 6 == 0 || frames == 0) {
                     if (health > 0) {
