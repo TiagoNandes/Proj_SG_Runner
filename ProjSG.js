@@ -821,12 +821,14 @@ window.onload = function () {
                 console.log("ROLLINGSPEED: " + rollingSpeed)
             }
 
+            // Detects collision once in 25 frames
             if (rollingSpeed <= 0.004) {
                 if (frames % 25 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
                 }
+            // Detects collision once in 21 frames
             } else if (rollingSpeed <= 0.006) {
                 if (frames % 21 == 0 || frames == 0) {
                     if (health > 0) {
@@ -834,12 +836,14 @@ window.onload = function () {
                     }
 
                 }
+            // Detects collision once in 17 frames    
             } else if (rollingSpeed <= 0.008) {
                 if (frames % 17 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
                 }
+            // Detects collision once in 13 frames    
             } else if (rollingSpeed <= 0.010) {
                 if (frames % 13 == 0 || frames == 0) {
                     if (health > 0) {
@@ -847,6 +851,7 @@ window.onload = function () {
                     }
 
                 }
+            // Detects collision once in 9 frames    
             } else if (rollingSpeed <= 0.012) {
                 if (frames % 9 == 0 || frames == 0) {
                     if (health > 0) {
@@ -854,6 +859,7 @@ window.onload = function () {
                     }
 
                 }
+            // Detects collision once in 6 frames
             } else if (rollingSpeed <= 0.014) {
                 if (frames % 6 == 0 || frames == 0) {
                     if (health > 0) {
