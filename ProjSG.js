@@ -515,6 +515,7 @@ window.onload = function () {
             let heartVector = newHeart.position.clone().normalize();
             newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
             newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
+            //Rotation to prevent the hearts from being upside down
             newHeart.rotation.z += Math.PI;
 
 
