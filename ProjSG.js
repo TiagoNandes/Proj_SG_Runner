@@ -329,7 +329,7 @@ window.onload = function () {
             steps: 2,
             depth: 1,
             bevelSize: 1,
-            bevelThickness: 1
+            bevelThickness: 2
         };
 
         var geometry = new THREE.ExtrudeBufferGeometry(heartShape, extrudeSettings);
@@ -338,7 +338,7 @@ window.onload = function () {
         // Allow heart object to cast shadow
         heart.castShadow = true;
         //resize heart
-        heart.scale.set(0.07, 0.07, 0.07);
+        heart.scale.set(0.08, 0.08, 0.08);
 
         return heart;
     }
@@ -458,7 +458,7 @@ window.onload = function () {
     // Create Barrier
     //----------------------------------------------------------------------------
     function createBarrier() {
-        var barrierGeometry = new THREE.BoxGeometry(2, 4, 10);
+        var barrierGeometry = new THREE.BoxGeometry(4, 5, 10);
         // Create a texture phong material for the sphere, with map and bumpMap textures
         barrierMap = new THREE.TextureLoader().load('textures/barrier.jpg');
         barrierBumpMap = new THREE.TextureLoader().load('textures/barrier.jpg');
@@ -554,9 +554,8 @@ window.onload = function () {
             var heartVector = newHeart.position.clone().normalize();
             newHeart.quaternion.setFromUnitVectors(heartVector, rollingGroundVector);
             newHeart.rotation.x += (Math.random() * (2 * Math.PI / 10)) + -Math.PI / 10;
-            var axesHelper = new THREE.AxesHelper(20);
-            newHeart.add(axesHelper);
             newHeart.rotation.z += Math.PI;
+
 
             //Add to boostables_hearts array
             boostables_hearts.push(newHeart);
@@ -933,24 +932,46 @@ window.onload = function () {
         if (health >= 1) {
             if (frames % 100 == 0 || frames == 0) {
                 updateScore();
+                console.log("ROLLINGSPEED: " + rollingSpeed)
             }
 
-            if (rollingSpeed <= 0.005) {
+            if (rollingSpeed <= 0.004) {
                 if (frames % 25 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
 
                 }
-            } else if (rollingSpeed <= 0.010) {
+            } else if (rollingSpeed <= 0.006) {
+                if (frames % 21 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
+            } else if (rollingSpeed <= 0.008) {
                 if (frames % 17 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
 
                 }
-            } else if (rollingSpeed <= 0.015) {
-                if (frames % 10 == 0 || frames == 0) {
+            } else if (rollingSpeed <= 0.010) {
+                if (frames % 13 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
+            } else if (rollingSpeed <= 0.012) {
+                if (frames % 9 == 0 || frames == 0) {
+                    if (health > 0) {
+                        detectCollision()
+                    }
+
+                }
+            } else if (rollingSpeed <= 0.014) {
+                if (frames % 6 == 0 || frames == 0) {
                     if (health > 0) {
                         detectCollision()
                     }
@@ -986,7 +1007,6 @@ window.onload = function () {
                 }
 
             }
-
             if (robotMoveLeft) {
 
                 if (robot.position.x > -4) {
@@ -997,9 +1017,6 @@ window.onload = function () {
 
             }
         }
-
-
-
 
         frames++;
     }
